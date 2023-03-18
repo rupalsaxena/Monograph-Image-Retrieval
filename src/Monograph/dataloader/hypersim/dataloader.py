@@ -1,9 +1,9 @@
 import h5py
 
 class hypersim_dataloader:
-    def __init__(self):
+    def __init__(self, path):
         # this path will need to be changed for Euler
-        self.main_path = '/scratch/userdata/llingsch/monograph/hypersim/downloads/'
+        self.main_path = path
         
     def get_rgb(self, setting, scene, frame):
         # setting: 000_000
@@ -54,5 +54,6 @@ class hypersim_dataloader:
         return scene_data
 
 # example use of the hypersim_dataloader class
-dataloader = hypersim_dataloader()
-scene_data = dataloader.get_scene_data('001_001', '00', '0000', rgb_flag=False)
+dataloader = hypersim_dataloader('/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim/')
+scene_data = dataloader.get_scene_data('013_007', '00', '0000', rgb_flag=False)
+print(scene_data)
