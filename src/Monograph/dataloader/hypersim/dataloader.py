@@ -55,5 +55,5 @@ class hypersim_dataloader:
 
 # example use of the hypersim_dataloader class
 dataloader = hypersim_dataloader('/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim/')
-scene_data = dataloader.get_scene_data('013_007', '00', '0000', rgb_flag=False)
+scene_data = dataloader.get_scene_data('013_007', '00', '0001', rgb_flag=False)
 print(scene_data)
