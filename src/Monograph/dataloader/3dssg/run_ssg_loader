@@ -1,0 +1,2 @@
+#!/bin/bash
+sbatch --output=job_info.txt --time=04:00:00 --mem-per-cpu=4G --wrap="python3 dataloader.py"
