@@ -1,54 +1,89 @@
 import json
 import pandas as pd
 import numpy as np
-# class ssg_loader:
-#     def __init__(self, path):
-#         self.main_path = path
+from timeit import default_timer
+import pdb
+import pickle
 
-#     def load_object():
-#         return 
+class ssg_loader:
+    def __init__(self, relationships_file, objects_file):
+        self.df_relationships = self.load_json(relationships_file)
+        self.df_objects = self.load_json(objects_file)
+
+    def load_json(self, file_name):
+        data_path = '../../../../data/3dssg/'
+        file = open(f'{data_path}{file_name}')
+        json_data = json.load(file)
+
+        # normalize the relationships file to a pandas array
+        pd_file = pd.json_normalize(json_data, record_path=['scans'])
+
+        return pd_file
+
+    def create_graph_from_relationships(self, scan, df):
+        number_edges = len(df['relationships'][scan])
+        graph = np.zeros((2, number_edges), int)
+        for edge in range(number_edges):
+            graph[:, edge] = df['relationships'][scan][edge][:2]
+
+        return graph
+
+    def create_descriptor_graph(self, graph, scan, df, descriptor):
+        descriptor_graph = np.empty_like(graph, dtype='object')
+        number_edges = descriptor_graph.shape[1]
+        
+        for object in range(number_edges):
+            current_df = pd.DataFrame(df.loc[scan]['objects'])
+
+            start_object_id = graph[0, object]
+            descriptor_graph[0, object] = current_df.loc[current_df['id']==str(start_object_id)][descriptor].item()
+
+            end_object_id = graph[1, object]
+            descriptor_graph[1, object] = current_df.loc[current_df['id']==str(end_object_id)][descriptor].item()
+
+        return descriptor_graph
+
+    def create_scan_graphs(self, descriptor_list):
+        scan_graphs = []
+
+        for scan in self.df_relationships['scan'][:].items():
+            if not (self.df_objects.loc[self.df_objects['scan']==scan[1]].index).empty:
+                object_index = self.df_objects.loc[self.df_objects['scan']==scan[1]].index.item()
+                
+                current_scan_graph = []
+                edge_graph = self.create_graph_from_relationships(scan[0], self.df_relationships)
+                current_scan_graph.append(edge_graph)
+
+                for descriptor in descriptor_list:    
+                    descriptor_graph = self.create_descriptor_graph(edge_graph, object_index, self.df_objects, descriptor)
+                    current_scan_graph.append(descriptor_graph)
+                
+                current_scan_graph = np.asarray(current_scan_graph)
+
+                scan_graphs.append(current_scan_graph)
+        
+        return scan_graphs
+
+
+
+# get the scan id from the relationships file and use it to search for the corresponding scan in the objects file
+# discard the entry if the corresponding scan does not exist
+def main():
+    t1 = default_timer()
+    loader = ssg_loader('toy_relationships.json', 'toy_objects.json')
+    descriptor_list = ["nyu40", "eigen13", "rio27", "ply_color"]
+    graphs = loader.create_scan_graphs(descriptor_list)
+    graph_file = 'graph.npy'
+    t2 = default_timer()
+
+    with open(graph_file, 'wb') as fp:
+        pickle.dump(graphs, fp)
+    t3 = default_timer()
+    # p = open(graph_file, "rb")
+    # b = pickle.load(p)
+    print(t2-t1)
+    print(t3-t2)
+
     
-# f = open('/scratch/userdata/llingsch/monograph/3DSSG/objects.json')
-# objects = json.load(f)
-# print(objects['scans'][0]['objects'][0]['nyu40'])
-# f.close()
 
-# f = open('/scratch/userdata/llingsch/monograph/3DSSG/relationships.json')
-# relationships = json.load(f)
-# print(relationships['scans'][0]['relationships'][0])
-# f.close()
-
-
-
-#####################
-# I want to construct a simple data loader to get the nyu40 ID's for a list of relationships
-
-# normalize the edge relationships along the scans
-f_relationships = open('/scratch/userdata/llingsch/monograph/3DSSG/relationships.json')
-relationships = json.load(f_relationships)
-df_r = pd.json_normalize(relationships, record_path=['scans'])
-df_r = df_r.sort_values('scan')
-number_edges = len(df_r['relationships'][0])
-graph = np.zeros((2, number_edges), int)
-for edge in range(number_edges):
-    graph[:,edge] = df_r['relationships'][0][edge][:2]
-print(graph)
-print(df_r.scan[0])
-
-# normalize the node objects along the scans
-f_objects = open('/scratch/userdata/llingsch/monograph/3DSSG/objects.json')
-objects = json.load(f_objects)
-df_o = pd.json_normalize(objects, record_path=['scans'])
-df_o = df_o.sort_values('scan')
-number_edges = len(df_o['objects'][0])
-graph = np.zeros((2, number_edges), int)
-for edge in range(number_edges):
-    graph[:,edge] = df_o['objects'][0][edge][:2]
-print(graph)
-
-print(df_o.loc[df_o['scan']==df_r.scan[0]].objects)
-current_objects = df_o.loc[df_o['scan']==df_r.scan[0]]['objects'].item()
-current_df = pd.DataFrame(current_objects.item())
-# len(current_objects)
-
-current_df.loc[current_df['id']=='1']['eigen13'].item()
+main()
