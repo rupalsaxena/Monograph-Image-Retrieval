@@ -69,7 +69,8 @@ class ssg_loader:
 # get the scan id from the relationships file and use it to search for the corresponding scan in the objects file
 # discard the entry if the corresponding scan does not exist
 def main():
-    data_path = '../../../../data/3dssg/'
+    # data_path = '../../../../data/3dssg/' # toy files
+    data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     t1 = default_timer()
     loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
     descriptor_list = ["nyu40", "eigen13", "rio27", "ply_color"]
