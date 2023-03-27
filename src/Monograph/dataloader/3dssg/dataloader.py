@@ -6,13 +6,13 @@ import pdb
 import pickle
 
 class ssg_loader:
-    def __init__(self, relationships_file, objects_file):
+    def __init__(self, data_path, relationships_file, objects_file):
+        self.data_path = data_path
         self.df_relationships = self.load_json(relationships_file)
         self.df_objects = self.load_json(objects_file)
 
     def load_json(self, file_name):
-        data_path = '../../../../data/3dssg/'
-        file = open(f'{data_path}{file_name}')
+        file = open(f'{self.data_path}{file_name}')
         json_data = json.load(file)
 
         # normalize the relationships file to a pandas array
@@ -69,11 +69,12 @@ class ssg_loader:
 # get the scan id from the relationships file and use it to search for the corresponding scan in the objects file
 # discard the entry if the corresponding scan does not exist
 def main():
+    data_path = '../../../../data/3dssg/'
     t1 = default_timer()
-    loader = ssg_loader('toy_relationships.json', 'toy_objects.json')
+    loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
     descriptor_list = ["nyu40", "eigen13", "rio27", "ply_color"]
     graphs = loader.create_scan_graphs(descriptor_list)
-    graph_file = 'graph.npy'
+    graph_file = f'{data_path}graph.npy'
     t2 = default_timer()
 
     with open(graph_file, 'wb') as fp:
