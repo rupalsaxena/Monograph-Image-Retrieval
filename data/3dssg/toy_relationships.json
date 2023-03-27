@@ -1,4 +1,14 @@
-
+{
+    "scans": [
+ {"relationships":[
+            [
+             2,
+             1,
+             14,
+             "attached to"
+            ]
+    ],
+    "scan": "made_up"},
  {
   "relationships":[
    [
@@ -1953,7 +1963,7 @@
    ]
   ],
   "scan":"02b33df9-be2b-2d54-9062-1253be3ce186"
- }
+ },
 
  {
   "relationships":[
@@ -4089,7 +4099,7 @@
    ]
   ],
   "scan":"02b33dfb-be2b-2d54-92d2-cd012b2b3c40"
- }
+ },
 
  {
   "relationships":[
@@ -6021,7 +6031,7 @@
    ]
   ],
   "scan":"02b33dfd-be2b-2d54-91d2-55454852009e"
- }
+ },
 
  {
   "relationships":[
@@ -7485,7 +7495,7 @@
    ]
   ],
   "scan":"02b33e01-be2b-2d54-93fb-4145a709cec5"
- }
+ },
 
  {
   "relationships":[
@@ -8848,4 +8858,6 @@
   ],
   "scan":"02b33e03-be2b-2d54-9129-5d28efdd68fa"
  }
+]
+}
 
