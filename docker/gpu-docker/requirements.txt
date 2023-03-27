@@ -99,7 +99,6 @@ networkx==2.8.4
 notebook==6.4.12
 notebook-shim==0.1.0
 numba==0.55.2
-numpy==1.21.0
 oauthlib==3.2.0
 opt-einsum==3.3.0
 packaging==21.3
@@ -199,3 +198,5 @@ Werkzeug==2.0.2
 widgetsnbextension==3.6.1
 wrapt==1.13.3
 zipp==3.7.0
+numpy
+torch_geometric
