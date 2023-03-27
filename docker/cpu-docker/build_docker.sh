@@ -1,0 +1,1 @@
+docker build -t 3dvision/group9/torch-2.0.0 .
