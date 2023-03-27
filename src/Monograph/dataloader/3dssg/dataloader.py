@@ -72,7 +72,8 @@ def main():
     # data_path = '../../../../data/3dssg/' # toy files
     data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     t1 = default_timer()
-    loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
+    # loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
+    loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
     descriptor_list = ["nyu40", "eigen13", "rio27", "ply_color"]
     graphs = loader.create_scan_graphs(descriptor_list)
     graph_file = f'{data_path}graph.npy'
