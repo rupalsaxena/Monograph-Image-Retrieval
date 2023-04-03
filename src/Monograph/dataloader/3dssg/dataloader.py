@@ -5,6 +5,7 @@ from timeit import default_timer
 import pdb
 import pickle
 
+
 class ssg_loader:
     def __init__(self, data_path, relationships_file, objects_file):
         self.data_path = data_path
