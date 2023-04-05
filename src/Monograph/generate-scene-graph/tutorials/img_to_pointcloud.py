@@ -15,7 +15,7 @@ with h5py.File(depth_img, "r") as f: depth = f["dataset"][:].astype("float32")
 with h5py.File(semantic_img, "r") as f: semantic = f["dataset"][:].astype("float32")
 
 # params
-focal_len = 26.2484493
+focal_len = 1000
 
 # cal principal point of image
 height, width = depth.shape
