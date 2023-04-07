@@ -8,11 +8,11 @@ def main():
     semantic_img = "tutorials/data/frame.0003.semantic.hdf5"
 
     # reading files
-    with h5py.File(rgb_img, "r") as f: rgb = f["dataset"][:].astype("float32")
+    # with h5py.File(rgb_img, "r") as f: rgb = f["dataset"][:].astype("float32")
     with h5py.File(depth_img, "r") as f: depth = f["dataset"][:].astype("float32")
     with h5py.File(semantic_img, "r") as f: semantic = f["dataset"][:].astype("float32")
 
-    _gsg = GSG(rgb, depth, semantic, viz=False)
+    _gsg = GSG(depth, semantic, viz=True)
     graph = _gsg.get_graph()
     print(graph)
 

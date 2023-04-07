@@ -1,13 +1,12 @@
-import config
+import generate_scene_graph.config as config
 import numpy as np
 import open3d as o3d
-from Graph import Graph
+from generate_scene_graph.Graph import Graph
 
 # TODO: adapt graph output depending on the next step
 
 class GenerateSceneGraph:
-    def __init__(self, rgb, depth, semantic, viz=True):
-        self._rgb = rgb
+    def __init__(self, depth, semantic, viz=True):
         self._depth = depth
         self._semantic = semantic
         self._viz = viz
@@ -24,8 +23,8 @@ class GenerateSceneGraph:
             self.visualize()
 
     def find_focal_lengths(self):
-        near = config.fov_near
-        fov_x = config.fov_x
+        near = config.FOV_NEAR
+        fov_x = config.FOV_X
         fov_y = 2.0 * np.arctan(
             self.height * np.tan(fov_x/2.0) / self.width
         )
@@ -77,7 +76,7 @@ class GenerateSceneGraph:
                 if to_idx>fr_idx:
                     sq_dist = np.sum((np.array(self.medians[fr_id]) - np.array(self.medians[to_id]))**2)
                     dist = np.sqrt(sq_dist)
-                    if dist < config.dist_thresh:
+                    if dist < config.DIST_THRESH:
                         graph = Graph(self.medians[fr_id], self.medians[to_id], fr_id, to_id)
                         self.graphs.append(graph)
     
