@@ -1,0 +1,1 @@
+HYPERSIM_DATAPATH = "/Users/rupal/Documents/GitHub/ml-hypersim-main/data/"
