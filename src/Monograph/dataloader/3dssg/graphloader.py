@@ -33,4 +33,4 @@ def run_example():
     nyu_data = p.load_selected(nyu40=True, eigen13=False, rio27=False, ply=False)
     print(nyu_data[0])
 
-run_example()
+# run_example()
