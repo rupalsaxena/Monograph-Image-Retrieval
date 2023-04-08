@@ -45,6 +45,6 @@ Running ```ls``` above should return:
 
 Run the container as follows. Note: change euler_username to your euler username.
 ```
-singularity run --bind /cluster/home/euler_username:/home 3dvision_grp11_latest.sif 
+singularity run --bind /cluster/home/euler_username:/home --bind /cluster/project/infk/courses/252-0579-00L/group11_2023/datasets:/mnt/datasets 3dvision_grp11_latest.sif 
 ```
 Keep this repo in /cluster/home/euler_username path so that your repo can be mounted automatically inside docker. 

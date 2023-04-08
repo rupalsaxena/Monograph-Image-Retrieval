@@ -12,7 +12,7 @@ def main():
     with h5py.File(depth_img, "r") as f: depth = f["dataset"][:].astype("float32")
     with h5py.File(semantic_img, "r") as f: semantic = f["dataset"][:].astype("float32")
 
-    _gsg = GSG(depth, semantic, viz=True)
+    _gsg = GSG(depth, semantic)
     graph = _gsg.get_graph()
     print(graph)
 
