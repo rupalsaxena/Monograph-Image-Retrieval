@@ -63,11 +63,11 @@ class ssg_loader:
         # given: scan, dataframe
         # return:   edge_index in COO format with shape [2, num_edges]
         #           edge_attributes with shape [num_edges, num_edge_features]
-        number_edges = len(df.loc[df.scan==scan]['relationships'].iat[-1])
+        number_edges = len(df.loc[df.scan==scan]['relationships'].iat[0])
         edge_index = np.zeros((2, number_edges), int)
         edge_attr = np.zeros((number_edges))
         for edge in range(number_edges):
-            edge_ids = df.loc[df.scan==scan]['relationships'][1][edge][:2]
+            edge_ids = df.loc[df.scan==scan]['relationships'].iat[0][edge][:2]
 
             edge_index_start = np.where(correspondance_matrix[1,:]==edge_ids[0])[0][0]
             edge_index[0, edge] = edge_index_start
@@ -75,14 +75,14 @@ class ssg_loader:
             edge_index_end = np.where(correspondance_matrix[1,:]==edge_ids[1])[0][0]
             edge_index[1, edge] = edge_index_end
             
-            edge_attr[edge] = df.loc[df.scan==scan]['relationships'][1][edge][2]
+            edge_attr[edge] = int(df.loc[df.scan==scan]['relationships'].iat[0][edge][2])
 
-        return edge_index, edge_attr
+        return torch.tensor(edge_index), torch.tensor(edge_attr)
     
     def create_node_feature_matrix(self, scan, df):
         # given: scan, dataframe
         # return:   x node feature matrix with shape [num_nodes, num_node_features]
-        num_nodes = len(df.loc[df.scan==scan]['objects'].iat[-1])
+        num_nodes = len(df.loc[df.scan==scan]['objects'].iat[0])
         num_node_features = 5
         x = np.zeros((num_nodes, num_node_features))
 
@@ -90,24 +90,31 @@ class ssg_loader:
 
         for object in range(num_nodes):
             correspondance_matrix[0, object] = object
-            correspondance_matrix[1, object] = int(df.loc[df.scan==scan]['objects'][0][object]['id'])
+            correspondance_matrix[1, object] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['id'])
 
-            x[object, 0] = int(df.loc[df.scan==scan]['objects'][0][object]['nyu40'])
-            x[object, 1] = int(df.loc[df.scan==scan]['objects'][0][object]['eigen13'])
-            x[object, 2] = int(df.loc[df.scan==scan]['objects'][0][object]['rio27'])
-            x[object, 3] = int(df.loc[df.scan==scan]['objects'][0][object]['global_id'])
-            x[object, 4] = int(df.loc[df.scan==scan]['objects'][0][object]['ply_color'][1:], 16)
+            x[object, 0] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['nyu40'])
+            x[object, 1] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['eigen13'])
+            x[object, 2] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['rio27'])
+            x[object, 3] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['global_id'])
+            x[object, 4] = float(int(df.loc[df.scan==scan]['objects'].iat[0][object]['ply_color'][1:], 16)) / 16777215
         
-        return x, correspondance_matrix
+        return torch.tensor(x), correspondance_matrix
     
     def create_geometric_graphs(self):
+        # given:    class attributes
+        # return:   an array of torch_geometric.Data objects
         geometric_list = []
 
         for scan in self.df_relationships['scan'][:].items():
             if not (self.df_objects.loc[self.df_objects['scan']==scan[1]].index).empty:
-                pdb.set_trace()
                 x, cor_mat = self.create_node_feature_matrix(scan[1], self.df_objects)
                 edge_index, edge_attributes = self.create_edge_index_attributes(scan[1], self.df_relationships, cor_mat)
+
+                graph_data = Data(x=x, edge_index=edge_index, edge_attr=edge_attributes)
+
+                geometric_list.append(graph_data)
+        
+        return geometric_list
 
 
 
@@ -116,31 +123,18 @@ class ssg_loader:
 
 # get the scan id from the relationships file and use it to search for the corresponding scan in the objects file
 # discard the entry if the corresponding scan does not exist
-def main():
-    data_path = '../../../../data/3dssg/' # toy files
-    # data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
+def save_geometric_graphs():
+    # data_path = '../../../../data/3dssg/' # toy files
+    # loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
 
-    t1 = default_timer()
-    loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
+    data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
+    loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
 
-    loader.create_geometric_graphs()
+    graphs = loader.create_geometric_graphs()
 
+    graph_file = f'{data_path}geometric_graph.pt'
 
-    # loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
-    # descriptor_list = ["nyu40", "eigen13", "rio27", "ply_color"]
-    # graphs = loader.create_scan_graphs(descriptor_list)
-    # graph_file = f'{data_path}graph.npy'
-    # t2 = default_timer()
+    torch.save(graphs, graph_file)
+    # new_graphs = torch.load(graph_file)
 
-
-    # with open(graph_file, 'wb') as fp:
-    #     pickle.dump(graphs, fp)
-    # t3 = default_timer()
-    # p = open(graph_file, "rb")
-    # b = pickle.load(p)
-    # print(t2-t1)
-    # print(t3-t2)
-
-    
-
-main()
+save_geometric_graphs()
