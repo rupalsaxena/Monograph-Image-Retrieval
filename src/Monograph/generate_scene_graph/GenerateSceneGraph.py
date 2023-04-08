@@ -1,15 +1,14 @@
 import generate_scene_graph.config as config
 import numpy as np
-import open3d as o3d
 from generate_scene_graph.Graph import Graph
 
 # TODO: adapt graph output depending on the next step
 
 class GenerateSceneGraph:
-    def __init__(self, depth, semantic, viz=True):
+    def __init__(self, depth, semantic):
         self._depth = depth
         self._semantic = semantic
-        self._viz = viz
+        self._viz = config.viz
         self.height, self.width = depth.shape
         self.generate()
 
@@ -81,6 +80,7 @@ class GenerateSceneGraph:
                         self.graphs.append(graph)
     
     def visualize(self):
+        import open3d as o3d
         o3d_obj = []
         # plot point cloud
         pcd_o3d = o3d.geometry.PointCloud()

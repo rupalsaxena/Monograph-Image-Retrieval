@@ -16,6 +16,7 @@ class pipeline:
         # # get scene graphs from dataset
         graph_data = []
         for img_set in img_data:
-            _gsg = GSG(img_set.depth, img_set.semantic, viz=True)
+            _gsg = GSG(img_set.depth, img_set.semantic)
             graph = _gsg.get_graph()
             graph_data.append(graph)
+            print(graph_data)

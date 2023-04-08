@@ -1,1 +1,1 @@
-HYPERSIM_DATAPATH = "/Users/rupal/Documents/GitHub/ml-hypersim-main/data/"
+HYPERSIM_DATAPATH = "/workspace/Monograph-Image-Retrieval/data/hypersim/"
