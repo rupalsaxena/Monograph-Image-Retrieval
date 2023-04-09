@@ -81,5 +81,13 @@ def test(data):
 for epoch in tqdm(range(1, 101)):
     loss = train(graph)
 
+
+
+    
+
+
+          
+
+
 test_acc = test(graph)
 print('Test Accuracy : '+str(test_acc))
