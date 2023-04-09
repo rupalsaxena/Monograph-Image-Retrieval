@@ -19,12 +19,12 @@ import pdb
 
 
 
-# class GCN(torch.nn.Module):
+# class my_GCN(torch.nn.Module):
 #     def __init__(self):
 #         super().__init__()
 #         # self.conv1 = pyg.nn.GCNConv(4, 16)
 #         # self.conv2 = pyg.nn.GCNConv(16, 5)
-#         # self.fc0 = torch.nn.Linear(5, 5)
+#         self.fc0 = torch.nn.Linear(5, 5)
 
 #     def forward(self, data):
 #         x, edge_index = data.x.float(), data.edge_index
@@ -66,15 +66,30 @@ class load_n_train():
         # return:   the test and train loader for the triplet data from the graphloader.py file
         loader = graph_loader(path=path)
         train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=True, rio=True, g_id=False, ply=True)
-        test_triplets = loader.load_triplet_dataset(self.num_train, self.num_test, batch_size=self.batch_size, shuffle=False, nyu=True, eig=True, rio=True, g_id=False, ply=True)
+        test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=self.batch_size, shuffle=False, nyu=True, eig=True, rio=True, g_id=False, ply=True)
 
         return train_triplets, test_triplets
+
+    def pad_inputs(self, a, p, n):
+        num_nodes = np.max([a.shape[0], p.shape[0], n.shape[0]])
+        num_attr = a.shape[1]
+
+        a_x = torch.zeros((num_nodes, num_attr), dtype=torch.float)
+        a_x[:a.shape[0], :] = a.float()
+
+        p_x = torch.zeros((num_nodes, num_attr), dtype=torch.float)
+        p_x[:p.shape[0], :] = p.float()
+
+        n_x = torch.zeros((num_nodes, num_attr), dtype=torch.float)
+        n_x[:n.shape[0], :] = n.float()
+
+        return a_x, p_x, n_x
 
     def train(self):
         # given:    self variables
         # return:   the trained model
         train_loader, test_loader = self.call_loader(path='../../../data/3dssg/')
-
+        
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
 
@@ -85,9 +100,11 @@ class load_n_train():
                 p = triplet[1]
                 n = triplet[2]
 
-                a_out = self.model(a.x.float(), a.edge_index, edge_attr=a.edge_attr)
-                p_out = self.model(p.x.float(), p.edge_index, edge_attr=p.edge_attr)
-                n_out = self.model(n.x.float(), n.edge_index, edge_attr=n.edge_attr)
+                a_x, p_x, n_x = self.pad_inputs(a.x, p.x, n.x)
+
+                a_out = self.model(a_x, a.edge_index, edge_attr=a.edge_attr)
+                p_out = self.model(p_x, p.edge_index, edge_attr=p.edge_attr)
+                n_out = self.model(n_x, n.edge_index, edge_attr=n.edge_attr)
 
                 loss = self.loss_function(a_out, p_out, n_out)
                 train_loss += loss.item()
@@ -102,9 +119,11 @@ class load_n_train():
                     p = triplet[1]
                     n = triplet[2]
 
-                    a_out = self.model(a.x.float(), a.edge_index, edge_attr=a.edge_attr)
-                    p_out = self.model(p.x.float(), p.edge_index, edge_attr=p.edge_attr)
-                    n_out = self.model(n.x.float(), n.edge_index, edge_attr=n.edge_attr)
+                    a_x, p_x, n_x = self.pad_inputs(a.x, p.x, n.x)
+
+                    a_out = self.model(a_x, a.edge_index, edge_attr=a.edge_attr)
+                    p_out = self.model(p_x, p.edge_index, edge_attr=p.edge_attr)
+                    n_out = self.model(n_x, n.edge_index, edge_attr=n.edge_attr)
 
                     test_loss += self.loss_function(a_out, p_out, n_out).item()
 
@@ -129,7 +148,6 @@ def run_it():
     }
     base = load_n_train(train_configs)
 
-    pdb.set_trace()
     base.train()
 
 run_it()
