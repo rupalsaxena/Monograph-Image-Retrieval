@@ -13,7 +13,7 @@ def main():
     with h5py.File(semantic_img, "r") as f: semantic = f["dataset"][:].astype("float32")
 
     _gsg = GSG(depth, semantic)
-    graph = _gsg.get_graph()
+    graph = _gsg.get_torch_graph()
     print(graph)
 
 if __name__ == '__main__':
