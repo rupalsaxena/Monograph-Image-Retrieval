@@ -10,34 +10,34 @@ class pipeline:
         pass
     
     def run_pipeline(self):
-        # get img_data for one setting
-        # TODO: do it for different settings
-        setting = '013_007'
-        input_data = hypersim_config.HYPERSIM_DATAPATH
-        dl = dataloader(input_data)
-        img_data = dl.get_dataset(setting)
-
-        # # get scene graphs from dataset
-        ## TODO: export for each scene seperately and not for entire setting in one file
-        graphs = []
-        for idx, img_set in enumerate(img_data):
-            _gsg = GSG(img_set.depth, img_set.semantic)
-            graph = _gsg.get_torch_graph()
-            graphs.append(graph)
-            print(graphs)
-
-            # TODO: remove this later
-            if idx==2:
-                break
-
-        # output graphs in files
+        settings = hypersim_config.HYPERSIM_SETTINGS
         output_folder = hypersim_config.HYPERSIM_GRAPHS
-        setting_output = os.path.join(output_folder, f'ai_{setting}')
-        if not os.path.exists(setting_output):
-            os.makedirs(setting_output)
-        
-        filename = os.path.join(setting_output, f'{setting}_graphs.pt')
-        if not graph_config.viz:
-            import torch
-            torch.save(graphs, filename)
 
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        for setting in settings:
+            print("running for ai_", setting)
+            # get img_data from setting
+            input_data = hypersim_config.HYPERSIM_DATAPATH
+            dl = dataloader(input_data)
+            img_data = dl.get_dataset(setting)
+
+            # get scene graphs from dataset
+            graphs = {}
+            for idx, img_set in enumerate(img_data):
+                _gsg = GSG(img_set.depth, img_set.semantic)
+                graph = _gsg.get_torch_graph()
+                scene_id = img_set.scene
+                if scene_id not in graphs.keys():
+                    graphs[scene_id] = [graph]
+                else:
+                    graphs[scene_id].append(graph)
+
+            # output graphs for each scene
+            if not graph_config.viz:
+                import torch
+                for scene_id in graphs:
+                    filename = os.path.join(output_folder, f'ai_{setting}_scene_{scene_id}.pt')
+                    torch.save(graphs[scene_id], filename)
+                    print("graph saved in", f'ai_{setting}_scene_{scene_id}.pt')
