@@ -1,5 +1,5 @@
-# store graph data in form of object
-class Graph:
+# store Node to Node data in form of object
+class NodeNode:
     def __init__(self, fr_cord, to_cord, fr_id, to_id, frame_id=None, scene_id=None):
         self.from_coord = fr_cord
         self.to_coord = to_cord
