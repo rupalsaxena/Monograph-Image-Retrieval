@@ -12,7 +12,7 @@ class graph_loader():
         # self.data = pickle.load(graph_file)
         self.data = torch.load(f'{path}torch_graph.pt')
 
-        # ["nyu40", "eigen13", "rio27", "ply_color"]
+        # ["nyu40", "eigen13", "rio27", "global_id", "ply_color"]
     def load_selected(self, idx, nyu40=True, eigen13=True, rio27=True, global_id=True, ply=True):
         # given:    index of graph
         # return:   torch_geometric.Data object at that index with selected attributes
@@ -45,12 +45,11 @@ class graph_loader():
 
         return self.data[idx]
     
-    def make_anchor_positive(self, graph):
+    def make_anchor_positive(self, graph, offset=50):
         # given:    a graph and the data
         # return:   an achor, a positive, and a negative
-        num_edges = graph.edge_index.shape[-1]
+        num_edges = graph.edge_index.shape[-1]//2
         random_indices = torch.randperm(num_edges)
-        offset  = 50
 
         anchor_x = graph.x
         anchor_edge_index = torch.index_select(graph.edge_index, 1, random_indices[:num_edges//2])

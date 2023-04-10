@@ -1,6 +1,7 @@
 from dataloader import hypersim_config
 from dataloader.hypersim.dataloader import hypersim_dataloader as dataloader 
 from generate_scene_graph.GenerateSceneGraph import GenerateSceneGraph as GSG
+import pdb
 
 
 class pipeline:
@@ -15,6 +16,7 @@ class pipeline:
 
         # # get scene graphs from dataset
         graph_data = []
+        pdb.set_trace()
         for img_set in img_data:
             _gsg = GSG(img_set.depth, img_set.semantic)
             graph = _gsg.get_graph()

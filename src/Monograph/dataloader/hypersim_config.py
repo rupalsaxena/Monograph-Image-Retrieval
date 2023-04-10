@@ -1,1 +1,1 @@
-HYPERSIM_DATAPATH = "/workspace/Monograph-Image-Retrieval/data/hypersim/"
+HYPERSIM_DATAPATH = "/mnt/datasets/hypersim/"
