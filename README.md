@@ -84,11 +84,11 @@ Please follow the steps to run the pipeline.
 
 ***Step 5:*** Navigate to ```src/Monograph/dataloader/hypersim_config.py``` file of this repo and update HYPERSIM_DATAPATH value to path of the hypersim data. Please note that HYPERSIM_DATAPATH should be path inside docker of your data.
 
-***Step 6:*** Use the following commands to run the pipeline.
+***Step 6:*** Use the following commands to save graphs from hypersim dataset.
 
 ```
 cd src/Monograph/
-python3 main.py
+python3 main_save_graphs.py
 ```
 ***Step 7:*** Sit back and enjoy because running this is gonna take a while :)
 

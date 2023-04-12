@@ -1,4 +1,4 @@
-from pipeline import pipeline
+from pipeline_save_graphs import pipeline
 
 def main():
     p = pipeline()

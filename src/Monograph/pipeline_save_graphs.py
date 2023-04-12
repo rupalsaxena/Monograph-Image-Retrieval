@@ -25,19 +25,23 @@ class pipeline:
 
             # get scene graphs from dataset
             graphs = {}
-            for idx, img_set in enumerate(img_data):
+            for img_set in img_data:
+                print(img_set.scene, img_set.frame)
                 _gsg = GSG(img_set.depth, img_set.semantic)
-                graph = _gsg.get_torch_graph()
-                scene_id = img_set.scene
-                if scene_id not in graphs.keys():
-                    graphs[scene_id] = [graph]
-                else:
-                    graphs[scene_id].append(graph)
 
-            # output graphs for each scene
+                # skipping generating graphs if in vizualization mode, otherwise generate torch graphs
+                if not graph_config.viz:
+                    graph = _gsg.get_torch_graph()
+                    scene_id = img_set.scene
+                    if scene_id not in graphs.keys():
+                        graphs[scene_id] = [graph]
+                    else:
+                        graphs[scene_id].append(graph)
+
+            # skipping saving torch graph if in vizualization mode, otherwise saving torch graphs
             if not graph_config.viz:
                 import torch
                 for scene_id in graphs:
-                    filename = os.path.join(output_folder, f'ai_{setting}_scene_{scene_id}.pt')
+                    filename = os.path.join(output_folder, f'ai_{setting}_{scene_id}_graphs.pt')
                     torch.save(graphs[scene_id], filename)
-                    print("graph saved in", f'ai_{setting}_scene_{scene_id}.pt')
+                    print("graph saved in", f'ai_{setting}_{scene_id}_graphs.pt')
