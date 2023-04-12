@@ -31,7 +31,7 @@ To use Singularity in euler, your NETHZ username has to be added to ID-HPC-SINGU
 
 Request a compute node with Singularity. This step will take some time. 
 ```
-bsub -n 1 -R singularity -R light -Is bash
+srun --pty --mem-per-cpu=4G --gpus=1 bash
 ```
 
 Load module eth_proxy to connect to the internet from a compute node
