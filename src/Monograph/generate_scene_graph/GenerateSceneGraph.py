@@ -2,8 +2,6 @@ import numpy as np
 import generate_scene_graph.config as config
 from generate_scene_graph.NodeNode import NodeNode
 
-# import config
-# from NodeNode import NodeNode
 
 class GenerateSceneGraph:
     def __init__(self, depth, semantic):
