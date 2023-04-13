@@ -3,9 +3,9 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 import os
+import pdb
 
-
-class hypersim_graph_loader():
+class pipeline_graph_loader():
     def __init__(self, path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'):
         self.scene_files = os.listdir(path)
         self.scenes = []
@@ -49,8 +49,10 @@ class hypersim_graph_loader():
         # return:   a set of random graphs from any other scenes
 
         # want to select a random scene excluding our current anchor-positive scene
-        scenes = torch.arange(start, stop).float()
+        # num_scenes = stop - start
+        scenes = torch.arange(stop).float()
         weights = torch.ones_like(scenes)
+        weights[:start] = 0
         weights[idx] = 0
         
         # need to make 'num_graphs' number of negatives
@@ -70,7 +72,7 @@ def run_example():
     stop=15
     path = '../../../data/hypersim_graphs/'
     
-    loader = hypersim_graph_loader(path=path)
+    loader = pipeline_graph_loader(path=path)
     loader.load_triplet_dataset(start, stop)
 
-run_example()
+# run_example()

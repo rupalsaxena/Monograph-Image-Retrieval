@@ -92,3 +92,28 @@ python3 main_save_graphs.py
 ```
 ***Step 7:*** Sit back and enjoy because running this is gonna take a while :)
 
+## Running Data Loaders
+
+***3DSSG Data Loader*** 
+To load the triplet dataset, first import the file ```src/Monograph/dataloader/3dssg/graphloader.py```. Then, instantiate the class by providing it a path to the files which contain the graphs. Finally, call the member function ```load_triplet_dataset()``` with the start and stop indices of the graphs you would like to use.
+
+```
+import sys
+sys.path.append('<path from current file to graphloader.py>')
+from graphloader import ssg_graph_loader
+
+loader = ssg_graph_loader(path='<path defaults to data location on euler>')
+triplet_dataloader = loader.load_triplet_dataset(start, stop, batch_size=1, shuffle=False, nyu=True, eig=True, rio=True, g_id=False, ply=True)
+```
+
+***Pipeline Data Loader*** 
+To load the triplet dataset, first import the file ```src/Monograph/dataloader/pipeline_graphloader.py```. Then, instantiate the class by providing it a path to the files which contain the graphs. Finally, call the member function ```load_triplet_dataset()``` with the start and stop indices of the graphs you would like to use.
+
+```
+import sys
+sys.path.append('<path from current file to pipeline_graphloader.py>')
+from pipeline_graphloader import graph_loader
+
+loader = graph_loader(path='<path defaults to data location on euler>')
+triplet_dataloader = loader.load_triplet_dataset(start, stop, batch_size=1)
+```

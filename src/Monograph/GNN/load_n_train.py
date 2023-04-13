@@ -12,13 +12,16 @@ from torch_geometric.nn.models import GCN
 from Adam import Adam
 import sys
 sys.path.append('../dataloader/3dssg/')
-from graphloader import *
+from graphloader import ssg_graph_loader
+sys.path.append('../dataloader/')
+from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
 import pdb
 
 class load_n_train():
-    def __init__(self, configs, device):
+    def __init__(self, configs, device, model_name):
         self.device = device
+        self.data_source = configs['data_source']
 
         # training parameters
         self.epochs = configs['epochs']
@@ -35,7 +38,8 @@ class load_n_train():
         self.loss_function = TripletMarginLoss(margin=self.margin, p=self.p)
 
         # model
-        self.model = GCN(-1, 64, 4, 32).to(device)
+        self.model = GCN(-1, 32, 4, 32).to(device)
+        self.model_path = model_name
 
         # training optimizer
         self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4)
@@ -45,10 +49,16 @@ class load_n_train():
     def call_loader(self, path):
         # given:    a path to the torch.pt file of graphs
         # return:   the test and train loader for the triplet data from the graphloader.py file
-        loader = graph_loader(path=path)
-        train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
-        test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
-
+        
+        if self.data_source == 'ssg':
+            loader = ssg_graph_loader(path=path)
+            train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=False)
+            test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=False)
+        elif self.data_source == 'pipeline':
+            loader = pipeline_graph_loader(path=path)
+            train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False)
+            test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False)
+        
         return train_triplets, test_triplets
 
     def pad_inputs(self, a, p, n):
@@ -70,10 +80,10 @@ class load_n_train():
         # given:    self variables
         # return:   the trained model
         train_loader, test_loader = self.call_loader(path=path)
-        
+        self.model.train()
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
-
+            pdb.set_trace()
             train_loss = 0
             test_loss = 0
             for triplet in train_loader:
@@ -82,7 +92,7 @@ class load_n_train():
                 n = triplet[2].to(self.device)
 
                 a_x, p_x, n_x = self.pad_inputs(a.x, p.x, n.x)
-
+                
                 # a_out = self.model(a_x, a.edge_index, edge_attr=a.edge_attr)
                 # p_out = self.model(p_x, p.edge_index, edge_attr=p.edge_attr)
                 # n_out = self.model(n_x, n.edge_index, edge_attr=n.edge_attr)
@@ -120,7 +130,7 @@ class load_n_train():
             print(epoch, epoch_time, train_loss / self.num_train, test_loss / self.num_test)
         self.scheduler.step()
 
-        # torch.save(self.model, 'models/GCN_model_1')
+        torch.save(self.model, f'models/{self.model_path}')
 
 def run_trainer():
     # use the configs to train a GCN, saving it in 'models/'
@@ -129,24 +139,27 @@ def run_trainer():
         'learning_rate':   0.005,
         'epochs':          50,
         'batch_size':      20,
-        'num_train':       1000,
-        'num_test':        200,
+        'num_train':       20,
+        'num_test':        10,
         'scheduler_step':  10,
         'scheduler_gamma': 0.9,
         'triplet_loss_margin': 0.25,
-        'triplet_loss_p':   2
+        'triplet_loss_p':   2,
+        'data_source':             'pipeline'
     }
     if torch.cuda.is_available():
         device='cuda:0'
     else:
         device='cpu'
 
-    trainer = load_n_train(train_configs, device)
+    model_name = 'pipeline'
+    trainer = load_n_train(train_configs, device, model_name)
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
-    trainer.train(euler_path)
+    github_path = '../../../data/hypersim_graphs/'
+    trainer.train(github_path)
 
-# run_trainer()
+run_trainer()
 
 ##############################################################################################
 ##############################################################################################
