@@ -4,9 +4,11 @@ import pdb
 import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
+import os
+import random
 
-
-class graph_loader():
+torch.manual_seed(0)
+class ssg_graph_loader():
     def __init__(self,path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'):
         # graph_file = open(path+'graph.npy', "rb")
         # self.data = pickle.load(graph_file)
@@ -95,14 +97,14 @@ class graph_loader():
         # given:    a start and stop for a range of values
         # return:   a torch_geometric.Dataset object for that range
         return DataLoader(self.data[start:stop], batch_size=batchsize)
-       
-def run_example():
+
+def run_ssg_example():
     start = 0
     stop = 3
     shuffle = True
     batch_size = 1
 
-    p = graph_loader(path='../../../../data/3dssg/')
+    p = ssg_graph_loader(path='../../../../data/3dssg/')
 
     p.load_selected(0, global_id=False)
     test_loader = p.load_triplet_dataset(start, stop, batch_size=batch_size, shuffle=shuffle, nyu=True, eig=True, rio=True, g_id=False, ply=True)
@@ -116,4 +118,8 @@ def run_example():
         # calculate loss
         # back propagate
 
-# run_example()
+# run_ssg_example()
+
+
+
+
