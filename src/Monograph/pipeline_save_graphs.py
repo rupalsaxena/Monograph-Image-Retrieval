@@ -3,6 +3,7 @@ from dataloader import hypersim_config
 from generate_scene_graph import config as graph_config
 from dataloader.hypersim.dataloader import hypersim_dataloader as dataloader 
 from generate_scene_graph.GenerateSceneGraph import GenerateSceneGraph as GSG
+import pdb
 
 
 class pipeline:
