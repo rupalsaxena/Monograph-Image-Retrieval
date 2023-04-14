@@ -128,7 +128,7 @@ class load_n_train():
 
             print(epoch, epoch_time, train_loss / self.num_train, test_loss / self.num_test)
         self.scheduler.step()
-        #torch.save(self.model, f'models/{self.model_path}')
+        torch.save(self.model, self.model_path)
 
 def run_trainer():
     # use the configs to train a GCN, saving it in 'models/'
@@ -150,7 +150,7 @@ def run_trainer():
     else:
         device='cpu'
 
-    model_name = 'pipeline'
+    model_name = 'models/pipeline'
     trainer = load_n_train(train_configs, device, model_name)
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
