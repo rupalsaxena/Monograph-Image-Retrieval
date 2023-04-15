@@ -175,7 +175,7 @@ def save_geometric_graphs():
     # data_path = '../../../../data/3dssg/' # toy files
     # loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
 
-    data_path = '/cluster/home/juergeal/Monograph-Image-Retrieval/data/3dssg'
+    data_path = '/cluster/home/juergeal/Monograph-Image-Retrieval/data/3dssg/'
     loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
 
     graphs = loader.create_geometric_graphs()
