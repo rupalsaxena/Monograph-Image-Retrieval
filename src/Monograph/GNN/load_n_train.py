@@ -9,14 +9,14 @@ import torch.nn.functional as F
 import torch_geometric as pyg
 from torch.nn import TripletMarginLoss
 from torch_geometric.nn.models import GCN
-from Adam import Adam
 import sys
-sys.path.append('../dataloader/3dssg/')
+sys.path.append('GNN/')
+from Adam import Adam
+sys.path.append('dataloader/3dssg/')
 from graphloader import ssg_graph_loader
-sys.path.append('../dataloader/')
+sys.path.append('dataloader/')
 from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
-import pdb
 
 class load_n_train():
     def __init__(self, configs, device, model_name):
@@ -83,7 +83,6 @@ class load_n_train():
         self.model.train()
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
-            pdb.set_trace()
             train_loss = 0
             test_loss = 0
             for triplet in train_loader:
@@ -129,8 +128,7 @@ class load_n_train():
 
             print(epoch, epoch_time, train_loss / self.num_train, test_loss / self.num_test)
         self.scheduler.step()
-
-        torch.save(self.model, f'models/{self.model_path}')
+        torch.save(self.model, self.model_path)
 
 def run_trainer():
     # use the configs to train a GCN, saving it in 'models/'
@@ -152,14 +150,14 @@ def run_trainer():
     else:
         device='cpu'
 
-    model_name = 'pipeline'
+    model_name = 'models/pipeline'
     trainer = load_n_train(train_configs, device, model_name)
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
     github_path = '../../../data/hypersim_graphs/'
     trainer.train(github_path)
 
-run_trainer()
+#run_trainer()
 
 ##############################################################################################
 ##############################################################################################
