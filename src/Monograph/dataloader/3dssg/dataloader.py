@@ -5,14 +5,46 @@ from timeit import default_timer
 import pdb
 import pickle
 import torch
-from torch_geometric.data import Data
+#from torch_geometric.data import Data
 
 
 class ssg_loader:
-    def __init__(self, data_path, relationships_file, objects_file):
+    def __init__(self, data_path, relationships_file, objects_file, remove_semantics=True, nan=-1):
         self.data_path = data_path
         self.df_relationships = self.load_json(relationships_file)
         self.df_objects = self.load_json(objects_file)
+        self.nan=nan
+        self.remove_semantics=remove_semantics
+        self.rels={'attached to' : 0.3,
+            'behind': 1.2,
+            'bigger than': nan,
+            'brighter than': nan,
+            'build in': .3,
+            'close by': .6,
+            'darker than': nan,
+            'front': 1.2,
+            'hanging in':.4,
+            'hanging on':.4,
+            'higher than':1,
+            'leaning against':.3,
+            'left':1.2,
+            'lower than':1,
+            'lying on':.3,
+            'right':1.2,
+            'same color': nan,
+            'same material': nan,
+            'same object type': nan,
+            'same shape': nan,
+            'same state': nan,
+            'same texture': nan,
+            'smaller than': nan,
+            'standing in': .3,
+            'standing on': .4,
+            'supported by': .3,
+            'part of': .3,
+            'more comfortable than':nan,
+            }
+
 
     def load_json(self, file_name):
         file = open(f'{self.data_path}{file_name}')
@@ -66,17 +98,33 @@ class ssg_loader:
         number_edges = len(df.loc[df.scan==scan]['relationships'].iat[0])
         edge_index = np.zeros((2, number_edges), int)
         edge_attr = np.zeros((number_edges))
-        for edge in range(number_edges):
-            edge_ids = df.loc[df.scan==scan]['relationships'].iat[0][edge][:2]
-
-            edge_index_start = np.where(correspondance_matrix[1,:]==edge_ids[0])[0][0]
-            edge_index[0, edge] = edge_index_start
-
-            edge_index_end = np.where(correspondance_matrix[1,:]==edge_ids[1])[0][0]
-            edge_index[1, edge] = edge_index_end
+        if self.remove_semantics:
+            for edge in range(number_edges):
+                attribute=self.rels[df.loc[df.scan==scan]['relationships'].iat[0][edge][3]]
+                edge_attr[edge] = attribute
+                if attribute==self.nan:
+                    continue
+                edge_ids = df.loc[df.scan==scan]['relationships'].iat[0][edge][:2]
+                edge_index_start = np.where(correspondance_matrix[1,:]==edge_ids[0])[0][0]
+                edge_index[0, edge] = edge_index_start
+    
+                edge_index_end = np.where(correspondance_matrix[1,:]==edge_ids[1])[0][0]
+                edge_index[1, edge] = edge_index_end
+            idx=edge_attr!=self.nan
+            edge_index=edge_index.T[idx].T
+            edge_attr =edge_attr[idx]            
             
-            edge_attr[edge] = int(df.loc[df.scan==scan]['relationships'].iat[0][edge][2])
-
+        else:
+            for edge in range(number_edges):
+                edge_ids = df.loc[df.scan==scan]['relationships'].iat[0][edge][:2]
+                edge_index_start = np.where(correspondance_matrix[1,:]==edge_ids[0])[0][0]
+                edge_index[0, edge] = edge_index_start
+    
+                edge_index_end = np.where(correspondance_matrix[1,:]==edge_ids[1])[0][0]
+                edge_index[1, edge] = edge_index_end
+                
+                edge_attr[edge] = int(df.loc[df.scan==scan]['relationships'].iat[0][edge][2])
+        
         return torch.tensor(edge_index), torch.tensor(edge_attr)
     
     def create_node_feature_matrix(self, scan, df):
@@ -110,7 +158,7 @@ class ssg_loader:
                 x, cor_mat = self.create_node_feature_matrix(scan[1], self.df_objects)
                 edge_index, edge_attributes = self.create_edge_index_attributes(scan[1], self.df_relationships, cor_mat)
 
-                graph_data = Data(x=x, edge_index=edge_index, edge_attr=edge_attributes)
+                graph_data = 1#Data(x=x, edge_index=edge_index, edge_attr=edge_attributes)
 
                 geometric_list.append(graph_data)
         
@@ -127,7 +175,7 @@ def save_geometric_graphs():
     # data_path = '../../../../data/3dssg/' # toy files
     # loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
 
-    data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
+    data_path = '/cluster/home/juergeal/Monograph-Image-Retrieval/data/3dssg'
     loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
 
     graphs = loader.create_geometric_graphs()
