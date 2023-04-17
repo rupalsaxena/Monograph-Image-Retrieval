@@ -11,6 +11,7 @@ from torch.nn import TripletMarginLoss
 from torch.nn import MaxPool1d
 from torch_geometric.nn.models import GCN
 from Adam import Adam
+import os
 import sys
 sys.path.append('../dataloader/3dssg/')
 from graphloader import ssg_graph_loader
@@ -62,9 +63,17 @@ class load_n_train():
         self.loss_function = TripletMarginLoss(margin=self.margin, p=self.p)
 
         # model
-        self.model = GCN(-1, 32, 4, 32).to(device)
+        if configs['use_pretrained']:
+            self.model = torch.load(f'models/{model_name}')
+        else:
+            self.in_channels = configs['in_channels']
+            self.hidden_channels = configs['hidden_channels']
+            self.num_layers = configs['num_layers']
+            self.out_channels = configs['out_channels']
+            self.model = GCN(self.in_channels, self.hidden_channels, self.num_layers, self.out_channels).to(device)
         # self.model = GCN(configs).to(device)
         self.model_path = model_name
+        self.save_model = configs['save_model']
 
         # training optimizer
         self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4)
@@ -207,7 +216,8 @@ class load_n_train():
             # print(num_train_examples, num_test_examples)
         self.scheduler.step()
 
-        torch.save(self.model, f'models/{self.model_path}')
+        if self.save_model:
+            torch.save(self.model, f'models/{self.model_path}')
 
     def compute_distance(self, anchor_features, comparison_features):
         # given:    two data objects; 1 to be queried against, 1 being compared to the query
@@ -223,10 +233,10 @@ def run_trainer():
 
     train_configs = {
         'learning_rate':   0.001,
-        'epochs':          10,
+        'epochs':          100,
         'batch_size':      1,
-        'num_train':       1000,
-        'num_test':        300,
+        'num_train':       20,
+        'num_test':        10,
         'scheduler_step':  10,
         'scheduler_gamma': 0.9,
         'triplet_loss_margin': 1.0,
@@ -236,7 +246,9 @@ def run_trainer():
         'num_layers': 5,
         'out_channels': 64, 
         'kernel_size': 1,
-        'data_source':             'ssg'
+        'use_pretrained': True,
+        'data_source':   'pipeline', # pipeline or ssg
+        'save_model':   False
     }
     if torch.cuda.is_available():
         device='cuda:0'
@@ -248,7 +260,7 @@ def run_trainer():
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
     github_path = '../../../data/hypersim_graphs/'
-    trainer.train(euler_path)
+    trainer.train(github_path)
 
 # run_trainer()
 
@@ -346,4 +358,34 @@ def run_pretrained():
     # print(distance_a_p)
     # print(distance_a_n)
 
-run_pretrained()
+# run_pretrained()
+
+class pipeline_features():
+    def __init__(self, model, device):
+        # self.graph = graph
+        self.model = torch.load(f'models/{model}').to(device)
+
+    def get_features(self, graph):
+        with torch.no_grad():
+            edge_index = graph.edge_index - 1
+            features = self.model(graph.x, edge_index)
+            features = torch.max(features, 0).values
+        return features
+
+def run_pipeline_example():
+    if torch.cuda.is_available():
+        device='cuda:0'
+    else:
+        device='cpu'
+
+    path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'
+    scene_files = os.listdir(path)
+    scene = torch.load(f'{path}{scene_files[0]}')
+
+    graph = scene[0].to(device)
+    model = 'pretrained_on_3dssg'
+    pipeline = pipeline_features(model, device)
+    features = pipeline.get_features(graph)
+    print(features)
+
+run_pipeline_example()
