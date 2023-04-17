@@ -1,1 +1,1 @@
-docker build -t 3dvision/group11/torch-2.0.0-gpu .
+docker build -t rupalsaxena/3dvision_grp11 .

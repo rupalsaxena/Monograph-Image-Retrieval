@@ -191,4 +191,5 @@ widgetsnbextension==3.6.1
 wrapt==1.13.3
 zipp==3.7.0
 numpy
+torch==1.12.1
 torch_geometric
