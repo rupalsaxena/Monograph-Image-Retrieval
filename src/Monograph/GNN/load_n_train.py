@@ -10,14 +10,14 @@ import torch_geometric as pyg
 from torch.nn import TripletMarginLoss
 from torch.nn import MaxPool1d
 from torch_geometric.nn.models import GCN
-from Adam import Adam
 import sys
-sys.path.append('../dataloader/3dssg/')
+sys.path.append('GNN/')
+from Adam import Adam
+sys.path.append('dataloader/3dssg/')
 from graphloader import ssg_graph_loader
-sys.path.append('../dataloader/')
+sys.path.append('dataloader/')
 from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
-import pdb
 
 class GNN():
     def __init__(self, configs):
@@ -109,8 +109,6 @@ class load_n_train():
         
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
-            # pdb.set_trace()
-
             train_loss = 0
             test_loss = 0
             num_train_examples = 0
@@ -206,8 +204,7 @@ class load_n_train():
             print(epoch, epoch_time, train_loss / num_train_examples, train_accuracy / num_train_examples, test_loss / num_test_examples, test_accuracy / num_test_examples)
             # print(num_train_examples, num_test_examples)
         self.scheduler.step()
-
-        torch.save(self.model, f'models/{self.model_path}')
+        torch.save(self.model, self.model_path)
 
     def compute_distance(self, anchor_features, comparison_features):
         # given:    two data objects; 1 to be queried against, 1 being compared to the query
@@ -243,14 +240,14 @@ def run_trainer():
     else:
         device='cpu'
 
-    model_name = 'pipeline'
+    model_name = 'models/pipeline'
     trainer = load_n_train(train_configs, device, model_name)
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
     github_path = '../../../data/hypersim_graphs/'
     trainer.train(github_path)
 
-run_trainer()
+#run_trainer()
 
 ##############################################################################################
 ##############################################################################################
