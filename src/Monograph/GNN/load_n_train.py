@@ -20,28 +20,6 @@ from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
 import pdb
 
-class GNN():
-    def __init__(self, configs):
-        self.in_channels = configs['in_channels']
-        self.hidden_channels = configs['hidden_channels']
-        self.num_layers = configs['num_layers']
-        self.out_channels = configs['out_channels']
-        self.kernel_size = configs['kernel_size']
-
-        self.gcn = GCN(self.in_channels,
-                          self.hidden_channels,
-                         self.num_layers,
-                          self.out_channels)
-        
-        self.maxpool = MaxPool1d(self.kernel_size)
-        
-    def forward(self, x):
-        
-        x = self.gcn(x)
-        # x = self.maxpool(x)
-        x = torch.max(x, 0)
-        return x
-
 class load_n_train():
     def __init__(self, configs, device, model_name):
         self.device = device
@@ -118,7 +96,6 @@ class load_n_train():
         
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
-            # pdb.set_trace()
 
             train_loss = 0
             test_loss = 0
@@ -143,9 +120,6 @@ class load_n_train():
                     a_out = self.model(anc.x.float(), anc.edge_index)
                     p_out = self.model(pos.x.float(), pos.edge_index)
                     n_out = self.model(neg.x.float(), neg.edge_index)
-                    # a_out = self.model(anc.x, anc.edge_index, edge_attr = anc.edge_attribute)
-                    # p_out = self.model(pos.x, pos.edge_index, edge_attr = pos.edge_attribute)
-                    # n_out = self.model(neg.x, neg.edge_index, edge_attr = neg.edge_attribute)
 
                     a_out = torch.max(a_out, 0).values
                     p_out = torch.max(p_out, 0).values
@@ -191,9 +165,6 @@ class load_n_train():
                         a_out = self.model(anc.x.float(), anc.edge_index)
                         p_out = self.model(pos.x.float(), pos.edge_index)
                         n_out = self.model(neg.x.float(), neg.edge_index)
-                        # a_out = self.model(anc.x, anc.edge_index, edge_attr = anc.edge_attribute)
-                        # p_out = self.model(pos.x, pos.edge_index, edge_attr = pos.edge_attribute)
-                        # n_out = self.model(neg.x, neg.edge_index, edge_attr = neg.edge_attribute)
                         
                         a_out = torch.max(a_out, 0).values
                         p_out = torch.max(p_out, 0).values
@@ -263,129 +234,3 @@ def run_trainer():
     trainer.train(github_path)
 
 # run_trainer()
-
-##############################################################################################
-##############################################################################################
-##############################################################################################
-
-class load_pretrained():
-    def __init__(self, path, device):
-        self.model = torch.load(f'{path}').to(device)
-        self.device = device
-        self.data_source = 'pipeline'
-
-        self.loss_function = TripletMarginLoss(margin=1, p=2)
-
-    def compute_features(self, data):
-        # given:    a Data object
-        # return:   the output from the model
-
-        
-        if self.data_source == 'pipeline':
-            edge_index = data.edge_index - 1
-            features = self.model(data.x, edge_index)
-        else:
-            features = self.model(data.x, data.edge_index)
-        
-        # features = self.model(data.x, data.edge_index, edge_attr=data.edge_attr.float())
-        features = torch.max(features, 0).values
-        return features
-
-    def compute_distance(self, anchor, comparison):
-        # given:    two data objects; 1 to be queried against, 1 being compared to the query
-        # return:   the distance between the two outputs of the model
-
-        # anchor, comparison = self.pad_inputs(anchor, comparison)
-        anchor_features = self.compute_features(anchor)
-        comparison_features = self.compute_features(comparison)
-
-        loss = torch.nn.MSELoss(reduction='sum')
-        distance = loss(anchor_features, comparison_features)
-
-        return distance
-    
-    def evaluate_accuracy(self, test_loader):
-        with torch.no_grad():
-            test_accuracy = 0
-            num_test_examples = 0
-            # pdb.set_trace()
-            for triplet in test_loader:
-                anc = triplet[0].to(self.device)
-                pos = triplet[1].to(self.device)
-                neg = triplet[2].to(self.device)
-
-                distance_to_p = self.compute_distance(anc, pos)
-                distance_to_n = self.compute_distance(anc, neg)
-
-                num_test_examples += 1
-                if distance_to_n > distance_to_p:
-                    test_accuracy += 1
-
-                # test_loss += torch.max(distance_to_p - distance_to_n + 1)
-                print(f'{distance_to_p.item():.2f}, {distance_to_n.item(): .2f}, {bool(distance_to_p < distance_to_n)}')
-
-            print(test_accuracy / num_test_examples)
-    
-def run_pretrained():
-    # load a pretrained model and compare graphs
-    if torch.cuda.is_available():
-        device='cuda:0'
-    else:
-        device='cpu'
-    
-    # data_loader = graph_loader()
-    # anchor = data_loader.load_selected(0, nyu40=True, eigen13=False, rio27=False, global_id=False, ply=True)
-    # anchor, comparison_p = data_loader.make_anchor_positive(anchor, offset=100)
-    # anchor = anchor.to(device)
-    # comparison_p = comparison_p.to(device)
-    # comparison_n = data_loader.load_selected(2, nyu40=True, eigen13=False, rio27=False, global_id=False, ply=True).to(device)
-    num_train = 29
-    num_test = 2
-    github_path = '../../../data/hypersim_graphs/'
-    loader = pipeline_graph_loader(path=github_path)
-    # train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False)
-    test_triplets = loader.load_triplet_dataset(num_train, num_train + num_test, batch_size=1, shuffle=False)
-        
-
-    model = 'pretrained_on_3dssg'
-    pretrained = load_pretrained(f'models/{model}', device)
-    pretrained.evaluate_accuracy(test_triplets)
-
-
-
-    # distance_a_p = pretrained.compute_distance(anchor, comparison_p)
-    # distance_a_n = pretrained.compute_distance(anchor, comparison_n)
-    # print(distance_a_p)
-    # print(distance_a_n)
-
-# run_pretrained()
-
-class pipeline_features():
-    def __init__(self, model, device):
-        # self.graph = graph
-        self.model = torch.load(f'models/{model}').to(device)
-
-    def get_features(self, graph):
-        with torch.no_grad():
-            edge_index = graph.edge_index - 1
-            features = self.model(graph.x, edge_index)
-            features = torch.max(features, 0).values
-        return features
-
-def run_pipeline_example():
-    if torch.cuda.is_available():
-        device='cuda:0'
-    else:
-        device='cpu'
-
-    path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'
-    scene_files = os.listdir(path)
-    scene = torch.load(f'{path}{scene_files[0]}')
-
-    graph = scene[0].to(device)
-    model = 'pretrained_on_3dssg'
-    pipeline = pipeline_features(model, device)
-    features = pipeline.get_features(graph)
-    print(features)
-
-run_pipeline_example()
