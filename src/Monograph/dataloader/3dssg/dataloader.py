@@ -43,6 +43,18 @@ class ssg_loader:
             'supported by': .3,
             'part of': .3,
             'more comfortable than':nan,
+            'inside':.3,
+            'same symmetry as':nan,
+            'same as':nan,
+            'connected to':.3,
+            'belonging to':nan,
+            'cover':.3,
+            'lying in':.3,
+            'messier than':.3,
+            'cleaner than':.3,
+            'fuller than':nan,
+            'more closed':nan,
+            'more open':nan,
             }
 
 
