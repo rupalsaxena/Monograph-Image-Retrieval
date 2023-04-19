@@ -5,12 +5,18 @@ Created on Sun Apr 9 2023
 """
 import torch
 
-class pipeline_features():
-    def __init__(self, model, device):
+class PipelineFeatures():
+    def __init__(self, model):
         # self.graph = graph
-        self.model = torch.load(f'../models/{model}').to(device)
+        if torch.cuda.is_available():
+            self.device='cuda:0'
+        else:
+            self.device='cpu'
+
+        self.model = torch.load(model).to(self.device)
 
     def get_features(self, graph):
+        graph.to(self.device)
         with torch.no_grad():
             edge_index = graph.edge_index - 1
             features = self.model(graph.x, edge_index)
@@ -30,9 +36,9 @@ def run_pipeline_example():
     scene = torch.load(f'{path}{scene_files[0]}')
 
     graph = scene[0].to(device)
-    model = 'pretrained_on_3dssg'
+    model = 'models/pretrained_on_3dssg'
     pipeline = pipeline_features(model, device)
     features = pipeline.get_features(graph)
     print(features)
 
-run_pipeline_example()
+# run_pipeline_example()
