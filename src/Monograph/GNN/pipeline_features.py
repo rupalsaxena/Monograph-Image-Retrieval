@@ -8,7 +8,7 @@ import torch
 class pipeline_features():
     def __init__(self, model, device):
         # self.graph = graph
-        self.model = torch.load(f'models/{model}').to(device)
+        self.model = torch.load(f'../models/{model}').to(device)
 
     def get_features(self, graph):
         with torch.no_grad():
