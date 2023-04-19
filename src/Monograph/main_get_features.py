@@ -1,6 +1,6 @@
 import torch
 from configs import train as train_config
-from GNN.load_n_train import pipeline_features
+from GNN.pipeline_features import pipeline_features
 
 def run_training(graph):
     if torch.cuda.is_available():

@@ -4,22 +4,6 @@ Created on Sun Apr 9 2023
 @author: Levi Lingsch
 """
 import torch
-import numpy as np
-import torch.nn.functional as F
-import torch_geometric as pyg
-from torch.nn import TripletMarginLoss
-from torch.nn import MaxPool1d
-from torch_geometric.nn.models import GCN
-from Adam import Adam
-import os
-import sys
-sys.path.append('../dataloader/3dssg/')
-from graphloader import ssg_graph_loader
-sys.path.append('../dataloader/')
-from pipeline_graphloader import pipeline_graph_loader
-from timeit import default_timer
-import pdb
-
 
 class pipeline_features():
     def __init__(self, model, device):
@@ -31,9 +15,11 @@ class pipeline_features():
             edge_index = graph.edge_index - 1
             features = self.model(graph.x, edge_index)
             features = torch.max(features, 0).values
-    return features
+        
+        return features
 
 def run_pipeline_example():
+    import os
     if torch.cuda.is_available():
         device='cuda:0'
     else:
