@@ -4,7 +4,7 @@ from generate_scene_graph import config as graph_config
 from dataloader.hypersim.dataloader import hypersim_dataloader as dataloader 
 from generate_scene_graph.GenerateSceneGraph import GenerateSceneGraph as GSG
 
-from configs.feature_config import feature_config
+from configs import feature_config
 from GNN.PipelineFeatures import PipelineFeatures
 
 
@@ -16,6 +16,7 @@ class pipeline:
         pass
     
     def run_pipeline(self):
+        
         settings = hypersim_config.HYPERSIM_SETTINGS
         graph_output_folder = hypersim_config.HYPERSIM_GRAPHS
         feature_output_folder = feature_config.HYPERSIM_FEATURES
@@ -26,7 +27,7 @@ class pipeline:
         if not os.path.exists(feature_output_folder):
             os.makedirs(feature_output_folder)
 
-        pdb.set_trace()
+        
         for setting in settings:
             print("running for ai_", setting)
             # get img_data from setting
@@ -35,8 +36,9 @@ class pipeline:
             img_data = dl.get_dataset(setting)
 
             # get scene graphs from dataset
-            graphs = []
-            features = []
+            pdb.set_trace()
+            graphs = {}
+            features = {}
             for img_set in img_data:
                 print(img_set.scene, img_set.frame)
                 _gsg = GSG(img_set.depth, img_set.semantic)
@@ -55,9 +57,9 @@ class pipeline:
                         graphs[scene_id].append(graph)
 
                     if feature_config.SAVE_FEATURES:
-                        feature = _features(graph)
-                        if scene_id not in graphs.keys():
-                            features[scene_id] = (feature)
+                        feature = _features.get_features(graph)
+                        if scene_id not in features.keys():
+                            features[scene_id] = [feature]
                         else:
                             features[scene_id].append(feature)
 

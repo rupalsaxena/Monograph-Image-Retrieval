@@ -20,7 +20,7 @@ from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
 import pdb
 
-class load_pretrained():
+class LoadPretrained():
     def __init__(self, path, device):
         self.model = torch.load(f'{path}').to(device)
         self.device = device
@@ -90,8 +90,7 @@ def run_pretrained():
         
 
     model = 'pretrained_on_3dssg'
-    pretrained = load_pretrained(f'models/{model}', device)
+    pretrained = LoadPretrained(f'models/{model}', device)
     pretrained.evaluate_accuracy(test_triplets)
-
 
 # run_pretrained()

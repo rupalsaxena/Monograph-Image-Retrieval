@@ -20,7 +20,7 @@ from pipeline_graphloader import pipeline_graph_loader
 from timeit import default_timer
 import pdb
 
-class load_n_train():
+class LoadAndTrain():
     def __init__(self, configs, device, model_name):
         self.device = device
         self.data_source = configs['data_source']
@@ -227,7 +227,7 @@ def run_trainer():
         device='cpu'
 
     model_name = 'pretrained_on_3dssg'
-    trainer = load_n_train(train_configs, device, model_name)
+    trainer = LoadAndTrain(train_configs, device, model_name)
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
     github_path = '../../../data/hypersim_graphs/'
