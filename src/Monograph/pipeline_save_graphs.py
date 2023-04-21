@@ -26,14 +26,14 @@ class pipeline:
 
             # get scene graphs from dataset
             graphs = {}
-            for img_set in img_data:
-                print(img_set.scene, img_set.frame)
-                _gsg = GSG(img_set.depth, img_set.semantic)
+            for img_obj in img_data:
+                print(img_obj.scene, img_obj.frame)
+                _gsg = GSG(img_obj)
 
                 # skipping generating graphs if in vizualization mode, otherwise generate torch graphs
                 if not graph_config.viz:
                     graph = _gsg.get_torch_graph()
-                    scene_id = img_set.scene
+                    scene_id = img_obj.scene
                     if scene_id not in graphs.keys():
                         graphs[scene_id] = [graph]
                     else:

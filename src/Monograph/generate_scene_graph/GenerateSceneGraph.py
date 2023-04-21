@@ -4,11 +4,13 @@ from generate_scene_graph.NodeNode import NodeNode
 
 
 class GenerateSceneGraph:
-    def __init__(self, depth, semantic):
-        self._depth = depth
-        self._semantic = semantic
+    def __init__(self, img_set):
+        self._img_set = img_set
+        self._depth = img_set.depth
+        self._semantic = img_set.semantic
+        self._rgb = img_set.rgb
         self._viz = config.viz
-        self.height, self.width = depth.shape
+        self.height, self.width = self._depth.shape
         self.generate()
 
     def generate(self):
@@ -21,6 +23,7 @@ class GenerateSceneGraph:
             self.generate_graph_viz()
             self.visualize()
         else:
+            self.find_colors()
             self.generate_torch_graph()
 
     def find_focal_lengths(self):
@@ -39,14 +42,23 @@ class GenerateSceneGraph:
     
     def generate_point_cloud(self):
         """
-        generate point cloud using intrinsic parameters of camera
+        TODO: currently suboptimal, improve this logic
+        1. generate point cloud using intrinsic parameters of camera
+        2. saving rgb values of each object
         """
         x0 = self.width//2
         y0 = self.height//2
 
         self.ids_3d_points = {}
+        self.r_values = {}
+        self.g_values = {}
+        self.b_values = {}
+
         for id in self.sem_uniq:
             self.ids_3d_points[id] = []
+            self.r_values[id] = []
+            self.g_values[id] = []
+            self.b_values[id] = []
 
         self.pcd = []
         for i in range(self.height):
@@ -56,10 +68,17 @@ class GenerateSceneGraph:
                 y = (i - y0) * z / self.f_h
                 self.pcd.append([x, y, z])
 
+                r = self._rgb[i][j][0]
+                g = self._rgb[i][j][1]
+                b = self._rgb[i][j][2]
+
                 sem_id = self._semantic[i][j]
                 if sem_id != -1:
                     self.ids_3d_points[sem_id].append([x,y,z])
-    
+                    self.r_values[sem_id].append(r)
+                    self.g_values[sem_id].append(g)
+                    self.b_values[sem_id].append(b)
+
     def find_medians(self):
         # find medians of each object in image
         self.medians = {}
@@ -68,19 +87,34 @@ class GenerateSceneGraph:
             ys = np.array(self.ids_3d_points[id])[:,1]
             zs = np.array(self.ids_3d_points[id])[:,2]
             self.medians[id] = [np.median(xs), np.median(ys), np.median(zs)]
+    
+    def find_colors(self):
+        # find mean color of each object in image
+        self.colors = {}
+        for id in self.sem_uniq:
+            mean_R = sum(self.r_values[id])/len(self.r_values[id])
+            mean_G = sum(self.g_values[id])/len(self.g_values[id])
+            mean_B = sum(self.b_values[id])/len(self.b_values[id])
+            self.colors[id] = [mean_R, mean_G, mean_B]
 
     def generate_torch_graph(self):
         import torch
         from torch_geometric.data import Data
 
         # get node information
-        x_nodes = torch.empty(size=(1,1))
+        
+        x_nodes = torch.empty(size=(1,4), dtype=torch.float32)
         for sem_id in self.sem_uniq:
-            x_nodes = torch.cat([x_nodes, torch.tensor([[sem_id]])])
+            x_nodes = torch.cat([x_nodes, torch.tensor([[
+                    sem_id.astype("float32"),
+                    self.colors[sem_id][0].astype("float32"),
+                    self.colors[sem_id][1].astype("float32"),
+                    self.colors[sem_id][2].astype("float32")
+                ]])
+            ])
         x_nodes = x_nodes[1:]
-
         # get edge attributes and edge index
-        edge_attribute = torch.tensor([[]], dtype=torch.float64)
+        edge_attribute = torch.tensor([[]], dtype=torch.float32)
         edge_index = torch.tensor([[],[]], dtype=torch.int16)
 
         # loop over each node and generate torch graph
@@ -88,11 +122,15 @@ class GenerateSceneGraph:
             for to_node, to_id in enumerate(self.sem_uniq):
                 if to_node > fr_node:
                     sq_dist = np.sum((np.array(self.medians[fr_id]) - np.array(self.medians[to_id]))**2)
-                    dist = np.sqrt(sq_dist)
+                    dist = np.sqrt(sq_dist).astype("float32")
                     if dist < config.DIST_THRESH:
-                        edge_index = torch.cat([edge_index, torch.tensor([[fr_node+1],[to_node+1]])], dim=1)
+                        edge_index = torch.cat([edge_index, torch.tensor([[fr_node],[to_node]])], dim=1)
                         edge_attribute = torch.cat([edge_attribute, torch.tensor([[dist]])], dim=1)
-        self.torch_graph = Data(x=x_nodes, edge_index=edge_index, edge_attribute=edge_attribute)
+
+        setting_name = self._img_set.setting.split("_")
+        setting_name = f"{setting_name[0]}{setting_name[1]}"
+        y = [setting_name, self._img_set.scene, self._img_set.frame]
+        self.torch_graph = Data(x=x_nodes, edge_index=edge_index, edge_attribute=edge_attribute, y = y)
 
     def generate_graph_viz(self):
         # generate graph for viz
