@@ -1,7 +1,7 @@
 import numpy as np
 import generate_scene_graph.config as config
+from generate_scene_graph.utils import get_pc_rgb
 from generate_scene_graph.NodeNode import NodeNode
-
 
 class GenerateSceneGraph:
     def __init__(self, img_set):
@@ -41,43 +41,9 @@ class GenerateSceneGraph:
             self.sem_uniq.remove(-1)
     
     def generate_point_cloud(self):
-        """
-        TODO: currently suboptimal, improve this logic
-        1. generate point cloud using intrinsic parameters of camera
-        2. saving rgb values of each object
-        """
-        x0 = self.width//2
-        y0 = self.height//2
-
-        self.ids_3d_points = {}
-        self.r_values = {}
-        self.g_values = {}
-        self.b_values = {}
-
-        for id in self.sem_uniq:
-            self.ids_3d_points[id] = []
-            self.r_values[id] = []
-            self.g_values[id] = []
-            self.b_values[id] = []
-
-        self.pcd = []
-        for i in range(self.height):
-            for j in range(self.width):
-                z = self._depth[i][j]
-                x = (j - x0) * z / self.f_w
-                y = (i - y0) * z / self.f_h
-                self.pcd.append([x, y, z])
-
-                r = self._rgb[i][j][0]
-                g = self._rgb[i][j][1]
-                b = self._rgb[i][j][2]
-
-                sem_id = self._semantic[i][j]
-                if sem_id != -1:
-                    self.ids_3d_points[sem_id].append([x,y,z])
-                    self.r_values[sem_id].append(r)
-                    self.g_values[sem_id].append(g)
-                    self.b_values[sem_id].append(b)
+        self.ids_3d_points, self.r_values, self.g_values, self.b_values, self.pcd = get_pc_rgb(
+            self._rgb, self._depth, self._semantic, self.sem_uniq, self.height, self.width, self.f_w, self.f_h
+        )
 
     def find_medians(self):
         # find medians of each object in image
@@ -100,9 +66,7 @@ class GenerateSceneGraph:
     def generate_torch_graph(self):
         import torch
         from torch_geometric.data import Data
-
         # get node information
-        
         x_nodes = torch.empty(size=(1,4), dtype=torch.float32)
         for sem_id in self.sem_uniq:
             x_nodes = torch.cat([x_nodes, torch.tensor([[
