@@ -4,8 +4,8 @@ HYPERSIM_DATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/dat
 HYPERSIM_GRAPHS = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/"
 HYPERSIM_SETTINGS= [
     "001_001",
-    "013_007",
-    "013_009",
+    # "013_007",
+    # "013_009",
     # "013_010",
     # "014_003",
     # "014_006",
