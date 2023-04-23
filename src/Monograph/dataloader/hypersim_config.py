@@ -1,6 +1,7 @@
-HYPERSIM_DATAPATH = "/workspace/Monograph-Image-Retrieval/data/hypersim/" # input path of images
-HYPERSIM_GRAPHS = "/workspace/Monograph-Image-Retrieval/data/hypersim_graphs/" # output path of graphs
-
+# HYPERSIM_DATAPATH = "/workspace/Monograph-Image-Retrieval/data/hypersim/" # input path of images
+HYPERSIM_DATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim/"
+# HYPERSIM_GRAPHS = "/workspace/Monograph-Image-Retrieval/data/hypersim_graphs/" # output path of graphs
+HYPERSIM_GRAPHS = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/"
 HYPERSIM_SETTINGS= [
     "001_001",
     # "013_007",

@@ -6,9 +6,10 @@ import os
 import pdb
 
 class pipeline_graph_loader():
-    def __init__(self, path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'):
+    def __init__(self, threshold, path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'):
         self.scene_files = os.listdir(path)
         self.scenes = []
+        self.threshold = threshold
         
         for scene in self.scene_files:
             self.scenes.append(torch.load(f'{path}{scene}'))
@@ -37,12 +38,29 @@ class pipeline_graph_loader():
 
                 negative, negative_scene = self.make_negative(scene_idx, start, stop, 1)
                 
+                anchor = self.threshold_filer(anchor)
+                positive = self.threshold_filer(positive)
+                negative = self.threshold_filer(negative)
+                
                 triplet = [anchor, positive, negative]
 
                 data_set.append(triplet)
                 scenes_set.append([scene_idx, negative_scene])
 
         return DataLoader(data_set, batch_size=batch_size, shuffle=shuffle)
+    
+    def threshold_filer(self, graph):
+        # given:    a graph
+        # return:   a new graph with edge indices where the edge length is lower than some threshold
+
+        indices = torch.where(graph.edge_attribute < self.threshold)[1]
+        new_edge_attr = torch.index_select(graph.edge_attribute, 1, indices)
+        new_edge_index = torch.index_select(graph.edge_index, 1, indices)
+
+        graph.edge_attribute = new_edge_attr
+        graph.edge_index = new_edge_index
+
+        return graph
 
     def make_negative(self, idx, start, stop, num_graphs):
         # given:    an index of a scene
@@ -71,8 +89,9 @@ def run_example():
     start=0
     stop=15
     path = '../../../data/hypersim_graphs/'
+    threshold = 5.0
     
-    loader = pipeline_graph_loader(path=path)
+    loader = pipeline_graph_loader(threshold, path=path)
     loader.load_triplet_dataset(start, stop)
 
-# run_example()
+run_example()
