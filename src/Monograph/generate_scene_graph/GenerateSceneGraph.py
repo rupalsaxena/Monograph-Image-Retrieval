@@ -1,4 +1,5 @@
 import numpy as np
+from statistics import median
 import generate_scene_graph.config as config
 from generate_scene_graph.utils import get_pc_rgb
 from generate_scene_graph.NodeNode import NodeNode
@@ -58,10 +59,10 @@ class GenerateSceneGraph:
         # find mean color of each object in image
         self.colors = {}
         for id in self.sem_uniq:
-            mean_R = sum(self.r_values[id])/len(self.r_values[id])
-            mean_G = sum(self.g_values[id])/len(self.g_values[id])
-            mean_B = sum(self.b_values[id])/len(self.b_values[id])
-            self.colors[id] = [mean_R, mean_G, mean_B]
+            median_R = median(self.r_values[id])
+            median_G = median(self.g_values[id])
+            median_B = median(self.b_values[id])
+            self.colors[id] = [median_R, median_G, median_B]
 
     def generate_torch_graph(self):
         import torch
