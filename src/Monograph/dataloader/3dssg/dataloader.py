@@ -5,7 +5,8 @@ from timeit import default_timer
 import pdb
 import pickle
 import torch
-#from torch_geometric.data import Data
+from PIL import ImageColor
+from torch_geometric.data import Data
 
 
 class ssg_loader:
@@ -137,17 +138,16 @@ class ssg_loader:
                 
                 edge_attr[edge] = int(df.loc[df.scan==scan]['relationships'].iat[0][edge][2])
         
-        return torch.tensor(edge_index), torch.tensor(edge_attr)
+        return torch.tensor(edge_index, dtype=torch.float), torch.tensor(edge_attr, dtype=torch.float)
     
     def create_node_feature_matrix(self, scan, df):
         # given: scan, dataframe
         # return:   x node feature matrix with shape [num_nodes, num_node_features]
         num_nodes = len(df.loc[df.scan==scan]['objects'].iat[0])
-        num_node_features = 5
+        num_node_features = 7
         x = np.zeros((num_nodes, num_node_features))
 
         correspondance_matrix = np.zeros((2, num_nodes))
-
         for object in range(num_nodes):
             correspondance_matrix[0, object] = object
             correspondance_matrix[1, object] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['id'])
@@ -156,21 +156,22 @@ class ssg_loader:
             x[object, 1] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['eigen13'])
             x[object, 2] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['rio27'])
             x[object, 3] = int(df.loc[df.scan==scan]['objects'].iat[0][object]['global_id'])
-            x[object, 4] = float(int(df.loc[df.scan==scan]['objects'].iat[0][object]['ply_color'][1:], 16)) / 16777215
+            rgb = ImageColor.getcolor(df.loc[df.scan==scan]['objects'].iat[0][object]['ply_color'], 'RGB')
+            x[object, 4:] = rgb
         
-        return torch.tensor(x), correspondance_matrix
+        return torch.tensor(x, dtype=torch.float), correspondance_matrix
     
     def create_geometric_graphs(self):
         # given:    class attributes
         # return:   an array of torch_geometric.Data objects
         geometric_list = []
-
+        pdb.set_trace()
         for scan in self.df_relationships['scan'][:].items():
             if not (self.df_objects.loc[self.df_objects['scan']==scan[1]].index).empty:
                 x, cor_mat = self.create_node_feature_matrix(scan[1], self.df_objects)
                 edge_index, edge_attributes = self.create_edge_index_attributes(scan[1], self.df_relationships, cor_mat)
 
-                graph_data = 1#Data(x=x, edge_index=edge_index, edge_attr=edge_attributes)
+                graph_data = Data(x=x, edge_index=edge_index, edge_attr=edge_attributes)
 
                 geometric_list.append(graph_data)
         
@@ -187,7 +188,8 @@ def save_geometric_graphs():
     # data_path = '../../../../data/3dssg/' # toy files
     # loader = ssg_loader(data_path, 'toy_relationships.json', 'toy_objects.json')
 
-    data_path = '/cluster/home/juergeal/Monograph-Image-Retrieval/data/3dssg/'
+    # data_path = '/cluster/home/juergeal/Monograph-Image-Retrieval/data/3dssg/'
+    data_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     loader = ssg_loader(data_path, 'relationships.json', 'objects.json')
 
     graphs = loader.create_geometric_graphs()

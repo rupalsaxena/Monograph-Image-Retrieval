@@ -12,7 +12,7 @@ class ssg_graph_loader():
     def __init__(self,path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'):
         # graph_file = open(path+'graph.npy', "rb")
         # self.data = pickle.load(graph_file)
-        self.data = torch.load(f'{path}torch_graph.pt')
+        self.data = torch.load(f'{path}geometric_graph.pt')
 
         # ["nyu40", "eigen13", "rio27", "global_id", "ply_color"]
     def load_selected(self, idx, nyu40=True, eigen13=True, rio27=True, global_id=True, ply=True):
@@ -21,7 +21,6 @@ class ssg_graph_loader():
         assert idx < len(self.data), f'Index {idx} out of range for the given graph.'
         
         attributes = []
-
         if nyu40:
             attributes.append(0)
         if eigen13:
@@ -32,6 +31,8 @@ class ssg_graph_loader():
             attributes.append(3)
         if ply:
             attributes.append(4)
+            attributes.append(5)
+            attributes.append(6)
         selected_attributes = torch.tensor(attributes).int()
         
         x = torch.index_select(self.data[idx].x, 1, selected_attributes)
@@ -105,9 +106,11 @@ def run_ssg_example():
     batch_size = 1
 
     p = ssg_graph_loader(path='../../../../data/3dssg/')
+    p = ssg_graph_loader()
 
-    p.load_selected(0, global_id=False)
-    test_loader = p.load_triplet_dataset(start, stop, batch_size=batch_size, shuffle=shuffle, nyu=True, eig=True, rio=True, g_id=False, ply=True)
+    # p.load_selected(0, global_id=False)
+    test_loader = p.load_triplet_dataset(start, stop, batch_size=batch_size, shuffle=shuffle, nyu=True, eig=False, rio=False, g_id=False, ply=True)
+    
     pdb.set_trace()
     for triplet in test_loader:
         anchor = triplet[0]
