@@ -10,6 +10,7 @@ import torch_geometric as pyg
 from torch.nn import TripletMarginLoss
 from torch.nn import MaxPool1d
 from torch_geometric.nn.models import GCN
+import matplotlib.pyplot as plt
 from Adam import Adam
 import os
 import sys
@@ -24,7 +25,7 @@ class LoadAndTrain():
     def __init__(self, configs, device, model_name):
         self.device = device
         self.data_source = configs['data_source']
-
+        self.configs = configs
         # training parameters
         self.epochs = configs['epochs']
         self.num_train = configs['num_train']
@@ -34,6 +35,7 @@ class LoadAndTrain():
         self.scheduler_step = configs['scheduler_step']
         self.scheduler_gamma = configs['scheduler_gamma']
         self.pad = False
+        self.threshold = configs['threshold']
 
         # training loss function
         self.margin = configs['triplet_loss_margin']
@@ -43,6 +45,10 @@ class LoadAndTrain():
         # model
         if configs['use_pretrained']:
             self.model = torch.load(f'models/{model_name}')
+            self.in_channels = configs['in_channels']
+            self.hidden_channels = configs['hidden_channels']
+            self.num_layers = configs['num_layers']
+            self.out_channels = configs['out_channels']
         else:
             self.in_channels = configs['in_channels']
             self.hidden_channels = configs['hidden_channels']
@@ -50,8 +56,10 @@ class LoadAndTrain():
             self.out_channels = configs['out_channels']
             self.model = GCN(self.in_channels, self.hidden_channels, self.num_layers, self.out_channels).to(device)
         # self.model = GCN(configs).to(device)
+
         self.model_path = model_name
         self.save_model = configs['save_model']
+        self.training_figure = configs['training_figure']
 
         # training optimizer
         self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4)
@@ -64,10 +72,11 @@ class LoadAndTrain():
         
         if self.data_source == 'ssg':
             loader = ssg_graph_loader(path=path)
-            train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=False)
-            test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=False)
+            train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
+            test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
         elif self.data_source == 'pipeline':
-            loader = pipeline_graph_loader(path=path)
+            # pdb.set_trace()
+            loader = pipeline_graph_loader(self.threshold, path=path)
             train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False)
             test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False)
         
@@ -94,6 +103,7 @@ class LoadAndTrain():
         train_loader, test_loader = self.call_loader(path=path)
         self.model.train()
         
+        training_profile = np.zeros((self.epochs, 6))
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
 
@@ -101,29 +111,24 @@ class LoadAndTrain():
             test_loss = 0
             num_train_examples = 0
             train_accuracy = 0
+
+            self.model.train()
             for triplet in train_loader:
                 anc = triplet[0].to(self.device)
                 pos = triplet[1].to(self.device)
                 neg = triplet[2].to(self.device)
 
-                if self.data_source == 'pipeline':
-                    anc.edge_index = anc.edge_index - 1
-                    pos.edge_index = pos.edge_index - 1
-                    neg.edge_index = neg.edge_index - 1
+                anc.x[:,1:] = torch.clamp(anc.x[:,1:], min=0, max=1)
+                pos.x[:,1:] = torch.clamp(pos.x[:,1:], min=0, max=1)
+                neg.x[:,1:] = torch.clamp(neg.x[:,1:], min=0, max=1)
 
-                if self.pad == True:
-                    a_x, p_x, n_x = self.pad_inputs(anc.x, pos.x, neg.x)
-                    a_out = self.model(a_x, anc.edge_index)
-                    p_out = self.model(p_x, pos.edge_index)
-                    n_out = self.model(n_x, neg.edge_index)
-                else:
-                    a_out = self.model(anc.x.float(), anc.edge_index)
-                    p_out = self.model(pos.x.float(), pos.edge_index)
-                    n_out = self.model(neg.x.float(), neg.edge_index)
+                a_out = self.model(anc.x.float(), anc.edge_index.int(), edge_attr = anc.edge_attr)
+                p_out = self.model(pos.x.float(), pos.edge_index.int(), edge_attr = pos.edge_attr)
+                n_out = self.model(neg.x.float(), neg.edge_index.int(), edge_attr = neg.edge_attr)
 
-                    a_out = torch.max(a_out, 0).values
-                    p_out = torch.max(p_out, 0).values
-                    n_out = torch.max(n_out, 0).values
+                a_out = torch.max(a_out, 0).values
+                p_out = torch.max(p_out, 0).values
+                n_out = torch.max(n_out, 0).values
                 
                 num_train_examples += 1
 
@@ -136,6 +141,15 @@ class LoadAndTrain():
 
                 loss = self.loss_function(a_out, p_out, n_out)
                 train_loss += loss.item()
+                # print(train_loss)
+                if torch.isnan(a_out[0]).item():
+                    print(anc.y)
+                # if torch.isnan(p_out[0]).item():
+                #     print(pos.y)
+                # if torch.isnan(n_out[0]).item():
+                #     print(neg.y)
+                    
+
 
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -144,31 +158,24 @@ class LoadAndTrain():
             with torch.no_grad():
                 test_accuracy = 0
                 num_test_examples = 0
+
+                self.model.eval()
                 for triplet in test_loader:
                     anc = triplet[0].to(self.device)
                     pos = triplet[1].to(self.device)
                     neg = triplet[2].to(self.device)
 
-                    if self.data_source == 'pipeline':
-                        anc.edge_index = anc.edge_index - 1
-                        pos.edge_index = pos.edge_index - 1
-                        neg.edge_index = neg.edge_index - 1
+                    anc.x[:,1:] = torch.clamp(anc.x[:,1:], min=0, max=1)
+                    pos.x[:,1:] = torch.clamp(pos.x[:,1:], min=0, max=1)
+                    neg.x[:,1:] = torch.clamp(neg.x[:,1:], min=0, max=1)
 
-                    # a_out = self.model(a_x, a.edge_index, edge_attr=a.edge_attr)
-
-                    if self.pad == True:
-                        a_x, p_x, n_x = self.pad_inputs(anc.x, pos.x, neg.x)
-                        a_out = self.model(a_x, anc.edge_index)
-                        p_out = self.model(p_x, pos.edge_index)
-                        n_out = self.model(n_x, neg.edge_index)
-                    else:
-                        a_out = self.model(anc.x.float(), anc.edge_index)
-                        p_out = self.model(pos.x.float(), pos.edge_index)
-                        n_out = self.model(neg.x.float(), neg.edge_index)
+                    a_out = self.model(anc.x.float(), anc.edge_index.int(), edge_attr = anc.edge_attr)
+                    p_out = self.model(pos.x.float(), pos.edge_index.int(), edge_attr = pos.edge_attr)
+                    n_out = self.model(neg.x.float(), neg.edge_index.int(), edge_attr = neg.edge_attr)
                         
-                        a_out = torch.max(a_out, 0).values
-                        p_out = torch.max(p_out, 0).values
-                        n_out = torch.max(n_out, 0).values
+                    a_out = torch.max(a_out, 0).values
+                    p_out = torch.max(p_out, 0).values
+                    n_out = torch.max(n_out, 0).values
 
                     distnace_to_p = self.compute_distance(a_out, p_out)
                     distance_to_n = self.compute_distance(a_out, n_out)
@@ -184,11 +191,45 @@ class LoadAndTrain():
             epoch_time = stop_epoch - start_epoch
 
             print(epoch, epoch_time, train_loss / num_train_examples, train_accuracy / num_train_examples, test_loss / num_test_examples, test_accuracy / num_test_examples)
-            # print(num_train_examples, num_test_examples)
-        self.scheduler.step()
+            training_profile[epoch] = (epoch, epoch_time, train_loss / num_train_examples, train_accuracy / num_train_examples, test_loss / num_test_examples, test_accuracy / num_test_examples)
+            print(num_train_examples, num_test_examples)
 
+            self.scheduler.step()
+        print(num_train_examples, num_test_examples)
         if self.save_model:
             torch.save(self.model, f'models/{self.model_path}')
+
+        if self.training_figure:
+
+            epochs = training_profile[:,0]
+            train_loss = training_profile[:,2]
+            train_accuracy = training_profile[:,3]
+            test_loss = training_profile[:,4]
+            test_accuracy = training_profile[:,5]
+
+            fig, ax1 = plt.subplots()
+
+            color = 'tab:red'
+            ax1.set_xlabel('Epoch')
+            ax1.set_ylabel('Log Triplet Loss', color=color)
+            ax1.plot(epochs, np.log(train_loss), color=color, label='training loss')
+            ax1.plot(epochs, np.log(test_loss), '-.', color=color, label='testing loss')
+            ax1.tick_params(axis='y', labelcolor=color)
+            ax1.legend(loc='upper left')
+
+            ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+            color = 'tab:blue'
+            ax2.set_ylabel('Accuracy', color=color)  # we already handled the x-label with ax1
+            ax2.plot(epochs, train_accuracy, color=color, label='training accuracy')
+            ax2.plot(epochs, test_accuracy, '-.', color=color, label='testing accuracy')
+            ax2.tick_params(axis='y', labelcolor=color)
+
+            fig.tight_layout()  # otherwise the right y-label is slightly clipped
+            ax2.legend(loc='lower left')
+            # plt.figtext(0,0,self.configs)
+            plt.savefig(f"training_plots/hddn{self.hidden_channels}_lyrs{self.num_layers}_out{self.out_channels}_data{self.data_source}.png")
+            np.save(f"training_text/hddn{self.hidden_channels}_lyrs{self.num_layers}_out{self.out_channels}_data{self.data_source}", training_profile)
 
     def compute_distance(self, anchor_features, comparison_features):
         # given:    two data objects; 1 to be queried against, 1 being compared to the query
@@ -197,40 +238,64 @@ class LoadAndTrain():
         loss = torch.nn.MSELoss(reduction='sum')
         distance = loss(anchor_features, comparison_features)
 
-        return distance
+        return distance.item()
 
 def run_trainer():
     # use the configs to train a GCN, saving it in 'models/'
-
-    train_configs = {
+    euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
+    singularity_path = '/mnt/datasets/3dssg/'
+    train_configs1 = {
         'learning_rate':   0.001,
-        'epochs':          100,
+        'epochs':          10,
         'batch_size':      1,
-        'num_train':       20,
-        'num_test':        10,
-        'scheduler_step':  10,
+        'num_train':       1100,
+        'num_test':        200,
+        'scheduler_step':  1,
         'scheduler_gamma': 0.9,
         'triplet_loss_margin': 1.0,
         'triplet_loss_p':   2,
         'in_channels': -1,
-        'hidden_channels': 64,
+        'hidden_channels': 128,
+        'num_layers': 5,
+        'out_channels': 64, 
+        'kernel_size': 1,
+        'use_pretrained': False,
+        'data_source':   'ssg', # pipeline or ssg
+        'save_model':   True,
+        'training_figure':  True,
+        'threshold':        2.5,
+        'path': '../../../data/3dssg/'
+    }
+    train_configs2 = {
+        'learning_rate':   0.001,
+        'epochs':          50,
+        'batch_size':      1,
+        'num_train':       30,
+        'num_test':        3,
+        'scheduler_step':  1,
+        'scheduler_gamma': 0.97,
+        'triplet_loss_margin': 1.0,
+        'triplet_loss_p':   2,
+        'in_channels': -1,
+        'hidden_channels': 128,
         'num_layers': 5,
         'out_channels': 64, 
         'kernel_size': 1,
         'use_pretrained': True,
         'data_source':   'pipeline', # pipeline or ssg
-        'save_model':   False
+        'save_model':   True,
+        'training_figure':  True,
+        'threshold':        5.0,
+        'path': '../../../data/hypersim_graphs/'
     }
     if torch.cuda.is_available():
         device='cuda:0'
     else:
         device='cpu'
 
+    train_configs = train_configs2
     model_name = 'pretrained_on_3dssg'
     trainer = LoadAndTrain(train_configs, device, model_name)
-    euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
-    singularity_path = '/mnt/datasets/3dssg/'
-    github_path = '../../../data/hypersim_graphs/'
-    trainer.train(github_path)
+    trainer.train(train_configs['path'])
 
-# run_trainer()
+run_trainer()

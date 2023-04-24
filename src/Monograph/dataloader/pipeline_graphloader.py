@@ -23,7 +23,7 @@ class pipeline_graph_loader():
         data_set = []
         scenes_set = []
         for scene_idx in range(start, stop):
-            current_graphs = self.scenes[scene_idx][:5]
+            current_graphs = self.scenes[scene_idx]
             num_graphs = len(current_graphs)
 
             
@@ -89,9 +89,9 @@ def run_example():
     start=0
     stop=15
     path = '../../../data/hypersim_graphs/'
-    threshold = 5.0
+    threshold = 2.0
     
     loader = pipeline_graph_loader(threshold, path=path)
     loader.load_triplet_dataset(start, stop)
 
-run_example()
+# run_example()
