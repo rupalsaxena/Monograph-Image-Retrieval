@@ -1,11 +1,11 @@
 import os
+import argparse
 from dataloader import hypersim_config
 from generate_scene_graph import config as graph_config
 from dataloader.hypersim.dataloader import hypersim_dataloader as dataloader 
 from generate_scene_graph.GenerateSceneGraph import GenerateSceneGraph as GSG
 
-def run_pipeline():
-    settings = hypersim_config.HYPERSIM_SETTINGS
+def run_pipeline(settings):
     output_folder = hypersim_config.HYPERSIM_GRAPHS
 
     if not os.path.exists(output_folder):
@@ -43,7 +43,14 @@ def run_pipeline():
                 print("graph saved in", f'ai_{setting}_{scene_id}_graphs.pt')
 
 def main():
-    run_pipeline()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hypersim_setting")
+    args = parser.parse_args()
+    if args.hypersim_setting is not None:
+        settings = [args.hypersim_setting]
+    else:
+        settings = hypersim_config.HYPERSIM_SETTINGS
+    run_pipeline(settings)
 
 if __name__ == '__main__':
     main()

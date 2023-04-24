@@ -4,6 +4,9 @@
 HYPERSIM_DATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim/" # input path of images
 HYPERSIM_GRAPHS = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/" # output path of graphs
 
+# HYPERSIM_DATAPATH = "/Users/rupal/Documents/GitHub/ml-hypersim-main/data/"
+# HYPERSIM_GRAPHS = "/Users/rupal/Documents/GitHub/Monograph-Image-Retrieval/data/hypersim_graphs/"
+
 HYPERSIM_SETTINGS= [
 
     # old hypersim data: path hypersim
