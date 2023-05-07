@@ -1,0 +1,1 @@
+INPUT_PATH = "/Users/rupal/Documents/GitHub/Monograph-Image-Retrieval/data/torch_hypersim/HypersimSemanticDataset.pt"
