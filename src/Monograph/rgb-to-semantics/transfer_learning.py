@@ -63,8 +63,8 @@ def train_model(epochs=10):
 
     print("init loss and optimizer")
     # loss and optimizer init
-    loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adadelta(model.parameters(), lr=0.001, rho=0.9, eps=1e-06, weight_decay=0)
+    loss_fn = torch.nn.MSELoss(reduction='mean')
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     # Use gpu if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
