@@ -9,9 +9,11 @@ from TorchDataloader import TorchDataloader
 # generate hypersim data object
 generate = GenerateHypersimData()
 data = generate.get_dataset()
+print("data ready!")
 
 # using torch dataloader, create a dataloader object using data
 dataset = TorchDataloader(data)
+print("dataset ready!")
 # dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 # # test the dataloader object

@@ -19,6 +19,7 @@ TODO:
 """
 
 def prepare_data():
+    print("preparing dataset")
     # # data transformation
     # transforms = tv.transforms.Compose([
     #         tv.transforms.ToTensor(),
@@ -41,6 +42,7 @@ def prepare_data():
 
 # instantiate pretrained model
 def DeepLabV3(out_channels=1):
+    print("init network")
     # init network
     model = models.segmentation.deeplabv3_resnet101(pretrained=True,
                                                     progress=True)
@@ -48,9 +50,9 @@ def DeepLabV3(out_channels=1):
     # updating classing to DeepLabHead for semantic segmentation
     model.classifier = DeepLabHead(2048, out_channels)
 
-    # # freeze all the layers of the network
-    # for param in model.parameters():
-    #     param.requires_grad = False
+    # freeze all the layers of the network
+    for param in model.parameters():
+        param.requires_grad = False
 
     # set model to training mode
     return model
@@ -59,6 +61,7 @@ def train_model(epochs=10):
     trainloader, testloader, train_size, test_size = prepare_data()
     model = DeepLabV3()
 
+    print("init loss and optimizer")
     # loss and optimizer init
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adadelta(model.parameters(), lr=0.001, rho=0.9, eps=1e-06, weight_decay=0)
@@ -110,8 +113,5 @@ def train_model(epochs=10):
 
     return model
 
-
-
 model = train_model()
-
-
+torch.save(model, config.SAVE_MODEL_PATH)

@@ -11,6 +11,7 @@ class GenerateHypersimData:
     
     def get_dataset(self):
         for setting_id in self._settings:
+            print(f"running for setting id {setting_id}")
             scenes_info = self.get_scenes_frames_ids(setting_id)
             for scene_id in scenes_info:
                 frames = scenes_info[scene_id]
