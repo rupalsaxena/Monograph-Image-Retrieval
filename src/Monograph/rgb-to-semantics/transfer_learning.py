@@ -1,33 +1,19 @@
 import sys
 import torch 
-import config
 import torchvision as tv
 from torchvision import models
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Dataset
 from torchvision.models.segmentation.deeplabv3 import DeepLabHead
 
-
+import config
 sys.path.append("../dataloader/hypersim_pytorch/")
 from TorchDataloader import TorchDataloader
 
 
-"""
-TODO:
-1. Make sure output adjusts as per our outputs
-2. freeze layer to use pretrained weights
-3. replace number of outputs to get our outputs (not sure if it's applicable here.)
-"""
-
-def prepare_data():
+def prepare_data(input_path):
     print("preparing dataset")
-    # # data transformation
-    # transforms = tv.transforms.Compose([
-    #         tv.transforms.ToTensor(),
-    #         tv.transforms.Normalize(mean = [0.485, 0.456, 0.406], 
-    #                                 std = [0.229, 0.224, 0.225])])
-
     # load saved data
-    dataset = torch.load(config.INPUT_PATH)
+    dataset = torch.load(input_path)
 
     # split the data into train and test folder
     data_size = len(dataset)
@@ -36,34 +22,32 @@ def prepare_data():
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     # generate dataloader object for train and test set
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
     return train_loader, test_loader, len(train_dataset), len(test_dataset)
 
 # instantiate pretrained model
 def DeepLabV3(out_channels=1):
+    torch.cuda.empty_cache()
+
     print("init network")
     # init network
-    model = models.segmentation.deeplabv3_resnet101(pretrained=True,
-                                                    progress=True)
+    model = models.segmentation.deeplabv3_resnet50(pretrained=True) #(pretrained=True, progress=True)
     
     # updating classing to DeepLabHead for semantic segmentation
     model.classifier = DeepLabHead(2048, out_channels)
 
-    # freeze all the layers of the network
-    for param in model.parameters():
-        param.requires_grad = False
-
     # set model to training mode
     return model
 
-def train_model(epochs=10):
-    trainloader, testloader, train_size, test_size = prepare_data()
+def train_model(input_path, epochs=10):
+    trainloader, testloader, train_size, test_size = prepare_data(input_path)
     model = DeepLabV3()
 
     print("init loss and optimizer")
+
     # loss and optimizer init
-    loss_fn = torch.nn.MSELoss(reduction='mean')
+    loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     # Use gpu if available
@@ -73,12 +57,15 @@ def train_model(epochs=10):
     # for epochs
     for epoch in range(epochs):
         print("running for epoch:", epoch)
+
         model.train()
         train_loss = test_loss = 0.0
+        torch.cuda.empty_cache()
         for inputs, masks in trainloader:
-            inputs = inputs.permute(0, 3, 1, 2)
+
             inputs = inputs.to(device)
             masks = masks.to(device)
+            
             optimizer.zero_grad()
 
             # output from network
@@ -92,12 +79,12 @@ def train_model(epochs=10):
             optimizer.step()
 
             # accumulate loss
-            train_loss += loss.to("cpu")
+            train_loss += loss.to("cpu").detach()
 
         model.eval()
+        torch.cuda.empty_cache()
         with torch.no_grad():
             for inputs, masks in testloader:
-                inputs = inputs.permute(0, 3, 1, 2)
                 inputs = inputs.to(device)
                 masks = masks.to(device)
 
@@ -109,9 +96,9 @@ def train_model(epochs=10):
 
                 # accumulate loss
                 test_loss += loss.to("cpu")
-        print(f"\rEpoch {epoch+1}; train: {train_loss/train_size:1.5f}, val: {test_loss/test_size:1.5f}")
 
+        print(f"\rEpoch {epoch+1}; train: {train_loss/train_size:1.5f}, val: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model()
+model = train_model(config.INPUT_PATH)
 torch.save(model, config.SAVE_MODEL_PATH)
