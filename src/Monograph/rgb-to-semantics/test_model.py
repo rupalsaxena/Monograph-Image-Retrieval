@@ -43,8 +43,10 @@ with torch.no_grad():
         for i in range(len(inputs)):
             input_img = transform(inputs[i])
             mask_img = transform(masks[i])
+            output_img = transform(outputs["out"][i])
             input_img.save(f'predicted_images/rgb_{batch_idx * test_loader.batch_size + i}.jpg')
             mask_img.save(f'predicted_images/semantic_{batch_idx * test_loader.batch_size + i}.jpg')
+            output_img.save(f'predicted_images/predictions_{batch_idx * test_loader.batch_size + i}.jpg')
 
         # compute loss and other metrics
         loss = loss_fn(outputs['out'], masks)

@@ -16,7 +16,7 @@ class GenerateHypersimData:
             for scene_id in scenes_info:
                 frames = scenes_info[scene_id]
                 for frame_id in frames:
-                    input_img = get_rgb(self._path, setting_id, scene_id, frame_id)
+                    input_img = get_rgb_from_jpg(self._path, setting_id, scene_id, frame_id)
                     if self._purpose == "Depth":
                         mask_img = get_depth(self._path, setting_id, scene_id, frame_id)
                     elif self._purpose=="Semantic":

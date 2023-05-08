@@ -1,20 +1,40 @@
+import os
 import h5py
 import torch
+from torchvision import transforms
+import torch.nn.functional as F
+from PIL import Image
 
-def get_rgb(path, setting, scene, frame):
-    rgb_path = f'ai_{setting}/images/scene_cam_{scene}_final_hdf5/frame.{frame}.color.hdf5'
-    rgb_data = h5py.File(path + rgb_path)['dataset'][:].astype("float32")
-    rgb_data = torch.from_numpy(rgb_data).float()
-    return rgb_data
+def get_rgb_from_jpg(path, setting, scene, frame):
+    rgb_path = f'ai_{setting}/images/scene_cam_{scene}_final_preview/frame.{frame}.color.jpg'
+    fullpath = os.path.join(path, rgb_path)
+    rgb_img = Image.open(fullpath)
+    transform = transforms.Compose([
+        transforms.Resize((260, 320)), # Resize to 256x256
+        transforms.ToTensor()]) # Convert back to tensor
+    rgb_img = transform(rgb_img)
+    return rgb_img
 
 def get_semantic(path, setting, scene, frame):
     semantic_path = f'ai_{setting}/images/scene_cam_{scene}_geometry_hdf5/frame.{frame}.semantic.hdf5'
     semantic_data = h5py.File(path + semantic_path)['dataset'][:].astype("float32")
-    semantic_data = torch.from_numpy(semantic_data).float()
+    semantic_data = torch.from_numpy(semantic_data).float().unsqueeze(0)
+    resize = transforms.Resize((260, 320))
+    semantic_data = resize(semantic_data)
     return semantic_data
 
 def get_depth(path, setting, scene, frame):
     depth_path = f'ai_{setting}/images/scene_cam_{scene}_geometry_hdf5/frame.{frame}.depth_meters.hdf5'
     depth_data = h5py.File(path + depth_path)['dataset'][:].astype("float32")
     depth_data = torch.from_numpy(depth_data).float()
+    transform = transforms.Compose([
+                    transforms.ToPILImage(), # Convert tensor to PIL image
+                    transforms.Resize((260, 320)), # Resize to 256x256
+                    transforms.ToTensor()]) # Convert back to tensor
+    depth_data = transform(depth_data)
     return depth_data
+
+def write_img(img, path):
+    transform = transforms.Compose([transforms.ToPILImage()])
+    input_img = transform(img.permute(2,0,1))
+    input_img.save(path)
