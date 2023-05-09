@@ -14,6 +14,7 @@ TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets
 # create dataloader
 print("loading data!")
 test_dataset = torch.load(TESTDATAPATH)
+test_dataset = MaskDataLoader(dataset)
 test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
 print("data ready!")
 # # run model to predict output
@@ -37,7 +38,10 @@ test_loss = 0
 with torch.no_grad():
     for batch_idx, data in enumerate(test_loader):
         inputs = data[0]
-        masks = data[1]
+    
+        masks = data[1].squeeze()
+        masks = torch.tensor(masks, dtype=torch.long)
+
         setting = data[2]
         scene = data[3]
         frame = data[4]

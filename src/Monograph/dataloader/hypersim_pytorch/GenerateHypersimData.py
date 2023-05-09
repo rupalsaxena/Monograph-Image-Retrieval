@@ -10,7 +10,7 @@ class GenerateHypersimData:
         self._data = []
     
     def get_dataset(self):
-        # data formate: input_img, targets (semantic masks/depth masks), setting id, scene id, frame id
+        # data formate: input_img, targets (semantic labels/depth labels), setting id, scene id, frame id
         for setting_id in self._settings:
             print(f"running for setting id {setting_id}")
             scenes_info = self.get_scenes_frames_ids(setting_id)
@@ -21,7 +21,7 @@ class GenerateHypersimData:
                     if self._purpose == "Depth":
                         targets = get_depth(self._path, setting_id, scene_id, frame_id)
                     elif self._purpose=="Semantic":
-                        targets = get_semantic_masks(self._path, setting_id, scene_id, frame_id)
+                        targets = get_semantic_label(self._path, setting_id, scene_id, frame_id)
                     self._data.append((input_img, targets, setting_id, scene_id, frame_id))
         return self._data
 
