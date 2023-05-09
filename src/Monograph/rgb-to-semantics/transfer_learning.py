@@ -22,17 +22,17 @@ def prepare_data(input_path):
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     # generate dataloader object for train and test set
-    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
     return train_loader, test_loader, len(train_dataset), len(test_dataset)
 
 # instantiate pretrained model
-def DeepLabV3(out_channels=1):
+def DeepLabV3(out_channels=45):
     torch.cuda.empty_cache()
 
     print("init network")
     # init network
-    model = models.segmentation.deeplabv3_resnet50(pretrained=True) #(pretrained=True, progress=True)
+    model = models.segmentation.deeplabv3_resnet50(pretrained=True) # , progress=True)
     
     # updating classing to DeepLabHead for semantic segmentation
     model.classifier = DeepLabHead(2048, out_channels)
@@ -55,17 +55,19 @@ def train_model(input_path, epochs=10):
     model.to(device)
  
     # for epochs
+    torch.cuda.empty_cache()
     for epoch in range(epochs):
         print("running for epoch:", epoch)
-
         model.train()
         train_loss = test_loss = 0.0
         torch.cuda.empty_cache()
-        for inputs, masks in trainloader:
+        for data in trainloader:
+            inputs = data[0]
+            masks = data[1]
 
             inputs = inputs.to(device)
             masks = masks.to(device)
-            
+
             optimizer.zero_grad()
 
             # output from network
@@ -84,7 +86,10 @@ def train_model(input_path, epochs=10):
         model.eval()
         torch.cuda.empty_cache()
         with torch.no_grad():
-            for inputs, masks in testloader:
+            for data in testloader:
+                inputs = data[0]
+                masks = data[1]
+
                 inputs = inputs.to(device)
                 masks = masks.to(device)
 
@@ -100,5 +105,5 @@ def train_model(input_path, epochs=10):
         print(f"\rEpoch {epoch+1}; train: {train_loss/train_size:1.5f}, val: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=50)
+model = train_model(config.INPUT_PATH, epochs=20)
 torch.save(model, config.SAVE_MODEL_PATH)

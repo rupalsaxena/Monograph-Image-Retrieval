@@ -1,0 +1,18 @@
+import torch
+import numpy as np
+from PIL import Image
+
+import color_pallete
+
+def output_mask(mask, path):
+    mask = mask.detach().cpu().numpy()
+    mask = np.argmax(mask, axis=0)
+    mask = mask.squeeze()
+    H, W = mask.shape
+
+    out_img = np.zeros((H, W, 3), dtype=np.uint8)
+    for i in range(H):
+        for j in range(W):
+            out_img[i, j] = color_pallete.palette[mask[i, j]]
+    out_img = Image.fromarray(out_img)
+    out_img.save(path)

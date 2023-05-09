@@ -6,6 +6,7 @@ from TorchDataloader import TorchDataloader
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
+from utils import output_mask
 # load model
 MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/deeplabv3.pt"
 TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimSemanticDataset_Testset.pt"
@@ -13,7 +14,7 @@ TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets
 # create dataloader
 print("loading data!")
 test_dataset = torch.load(TESTDATAPATH)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
 print("data ready!")
 # # run model to predict output
 
@@ -34,7 +35,13 @@ print("ready to test")
 test_loss = 0
 # run on dataloader
 with torch.no_grad():
-    for batch_idx, (inputs, masks) in enumerate(test_loader):
+    for batch_idx, data in enumerate(test_loader):
+        inputs = data[0]
+        masks = data[1]
+        setting = data[2]
+        scene = data[3]
+        frame = data[4]
+
         inputs = inputs.to(device)
         masks = masks.to(device)
 
@@ -42,11 +49,9 @@ with torch.no_grad():
         outputs = model(inputs)
         for i in range(len(inputs)):
             input_img = transform(inputs[i])
-            mask_img = transform(masks[i])
-            output_img = transform(outputs["out"][i])
-            input_img.save(f'predicted_images/rgb_{batch_idx * test_loader.batch_size + i}.jpg')
-            mask_img.save(f'predicted_images/semantic_{batch_idx * test_loader.batch_size + i}.jpg')
-            output_img.save(f'predicted_images/predictions_{batch_idx * test_loader.batch_size + i}.jpg')
+            input_img.save(f'predicted_images/rgb_{setting[i]}_{scene[i]}_{frame[i]}.jpg')
+            output_mask(outputs["out"][i], f'predicted_images/predicted_{setting[i]}_{scene[i]}_{frame[i]}.jpg')
+            output_mask(masks[i], f'predicted_images/semantic_{setting[i]}_{scene[i]}_{frame[i]}.jpg')
 
         # compute loss and other metrics
         loss = loss_fn(outputs['out'], masks)
