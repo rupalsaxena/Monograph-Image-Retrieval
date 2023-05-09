@@ -54,5 +54,3 @@ with torch.no_grad():
         # accumulate loss
         test_loss += loss.to("cpu")
     print("loss:", test_loss/len(test_dataset))
-
-# save predicted output in the form of png
