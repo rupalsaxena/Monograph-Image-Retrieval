@@ -50,8 +50,8 @@ def train_model(input_path, epochs=10):
     print("init loss and optimizer")
 
     # loss and optimizer init
-    #loss_fn = torch.nn.MSELoss()
-    loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
+    loss_fn = torch.nn.MSELoss()
+    #loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     # Use gpu if available
@@ -67,8 +67,8 @@ def train_model(input_path, epochs=10):
         torch.cuda.empty_cache()
         for data in trainloader:
             inputs = data[0]
-            masks = data[1].squeeze()
-            masks = torch.tensor(masks, dtype=torch.long)
+            masks = data[1] #.squeeze()
+            #masks = torch.tensor(masks, dtype=torch.long)
 
             inputs = inputs.to(device)
             masks = masks.to(device)
@@ -92,8 +92,8 @@ def train_model(input_path, epochs=10):
         with torch.no_grad():
             for data in testloader:
                 inputs = data[0]
-                masks = data[1].squeeze()
-                masks = torch.tensor(masks, dtype=torch.long)
+                masks = data[1] # .squeeze()
+                # masks = torch.tensor(masks, dtype=torch.long)
 
                 inputs = inputs.to(device)
                 masks = masks.to(device)
@@ -110,5 +110,5 @@ def train_model(input_path, epochs=10):
         print(f"\rEpoch {epoch+1}; train: {train_loss/train_size:1.5f}, val: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=50)
+model = train_model(config.INPUT_PATH, epochs=10)
 torch.save(model, config.SAVE_MODEL_PATH)

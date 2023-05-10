@@ -18,9 +18,8 @@ def get_rgb_from_jpg(path, setting, scene, frame):
 def get_semantic_label(path, setting, scene, frame):
     semantic_path = f'ai_{setting}/images/scene_cam_{scene}_geometry_hdf5/frame.{frame}.semantic.hdf5'
     semantic_data = h5py.File(path + semantic_path)['dataset'][:]
-    semantic_data = torch.from_numpy(semantic_data) #.unsqueeze(0)
+    semantic_data = torch.from_numpy(semantic_data).unsqueeze(0)
     semantic_data =  transforms.Resize((320, 320))(semantic_data)
-    import pdb; pdb.set_trace()
 
     # # convert semantic label to semantic mask (ignoring -1 values)
     # num_classes = 45
