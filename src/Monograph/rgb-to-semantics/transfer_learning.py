@@ -4,6 +4,7 @@ import torchvision as tv
 from torchvision import models
 from torch.utils.data import DataLoader, random_split, Dataset
 from torchvision.models.segmentation.deeplabv3 import DeepLabHead
+from sklearn.metrics import f1_score, roc_auc_score
 
 import config
 from MaskDataLoader import MaskDataLoader
@@ -24,8 +25,8 @@ def prepare_data(input_path):
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     # # generate dataloader object for train and test set
-    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
     return train_loader, test_loader, len(train_dataset), len(test_dataset)
 
@@ -64,22 +65,31 @@ def train_model(input_path, epochs=10):
         print("running for epoch:", epoch)
         model.train()
         train_loss = test_loss = 0.0
+        b_f1score = []
+        b_auc_score = []
+
         torch.cuda.empty_cache()
         for data in trainloader:
             inputs = data[0]
-            masks = data[1] #.squeeze()
-            #masks = torch.tensor(masks, dtype=torch.long)
+            masks = data[1]
 
             inputs = inputs.to(device)
             masks = masks.to(device)
 
             optimizer.zero_grad()
+
             # output from network
             outputs = model(inputs)
 
             # compute loss
             loss = loss_fn(outputs['out'], masks)
 
+            # # compute metrics
+            # y_preds = outputs['out'].data.cpu().numpy().ravel()
+            # y_true = masks.data.cpu().numpy().ravel()
+            # b_f1score.append(f1_score(y_true > 0, y_preds > 0.1))
+            # b_auc_score.append(roc_auc_score(y_true.astype('uint8'), y_preds))
+        
             # perform update
             loss.backward()
             optimizer.step()
@@ -87,13 +97,16 @@ def train_model(input_path, epochs=10):
             # accumulate loss
             train_loss += loss.to("cpu").detach()
 
+        # update metrics
+        # train_f1score =  b_f1score.mean()
+        # train_auc = b_auc_score.mean()
+        
         model.eval()
         torch.cuda.empty_cache()
         with torch.no_grad():
             for data in testloader:
                 inputs = data[0]
-                masks = data[1] # .squeeze()
-                # masks = torch.tensor(masks, dtype=torch.long)
+                masks = data[1]
 
                 inputs = inputs.to(device)
                 masks = masks.to(device)
@@ -104,11 +117,22 @@ def train_model(input_path, epochs=10):
                 # compute loss
                 loss = loss_fn(outputs['out'], masks)
 
+                # # compute metrics
+                # y_preds = outputs['out'].data.cpu().numpy().ravel()
+                # y_true = masks.data.cpu().numpy().ravel()
+                # b_f1score.append(f1_score(y_true > 0, y_preds > 0.1))
+                # b_auc_score.append(roc_auc_score(y_true.astype('uint8'), y_preds))
+
                 # accumulate loss
                 test_loss += loss.to("cpu")
 
-        print(f"\rEpoch {epoch+1}; train: {train_loss/train_size:1.5f}, val: {test_loss/test_size:1.5f}")
+            #test_f1score =  b_f1score.mean()
+            #test_auc = b_auc_score.mean()
+
+        print(f"\rEpoch {epoch+1}")
+        print(f"train loss: {train_loss/train_size:1.5f}") 
+        print(f"val loss: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=10)
+model = train_model(config.INPUT_PATH, epochs=20)
 torch.save(model, config.SAVE_MODEL_PATH)

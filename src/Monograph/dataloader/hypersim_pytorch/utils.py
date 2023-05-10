@@ -20,13 +20,6 @@ def get_semantic_label(path, setting, scene, frame):
     semantic_data = h5py.File(path + semantic_path)['dataset'][:]
     semantic_data = torch.from_numpy(semantic_data).unsqueeze(0)
     semantic_data =  transforms.Resize((320, 320))(semantic_data)
-
-    # # convert semantic label to semantic mask (ignoring -1 values)
-    # num_classes = 45
-    # mask = torch.zeros((num_classes, 120, 120), dtype=torch.float32)
-    # for class_index in range(num_classes):
-    #     mask[class_index, :, :] = (semantic_data[0, :, :] == class_index).float()
-    
     return semantic_data
 
 def get_semantic(path, setting, scene, frame):
