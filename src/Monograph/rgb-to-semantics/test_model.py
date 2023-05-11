@@ -13,7 +13,7 @@ from MaskDataLoader import MaskDataLoader
 # TODO: saving hdf5 files part missing
 
 # load model
-MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/deeplabv3.pt"
+MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/sem_20_50.pt"
 TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/test.pt"
 
 # images path

@@ -5,7 +5,4 @@
 # # euler path
 INPUT_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimSemanticDataset_Train.pt"
 # INPUT_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/test.pt"
-
-
-# model name convent sem_{images_per_setting}_{epoch}.pt
-SAVE_MODEL_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/sem_20_50.pt"
+SAVE_MODEL_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/sem_img20_ep30_lr0.001.pt"

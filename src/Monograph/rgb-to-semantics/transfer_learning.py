@@ -1,5 +1,6 @@
 import sys
 import torch 
+import numpy as np
 import torchvision as tv
 from torchvision import models
 from torch.utils.data import DataLoader, random_split, Dataset
@@ -58,7 +59,7 @@ def train_model(input_path, epochs=10):
     loss_fn = torch.nn.MSELoss()
 
     #loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     # Use gpu if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -87,7 +88,7 @@ def train_model(input_path, epochs=10):
             outputs = model(inputs)
 
             # compute loss
-            loss = loss_fn(outputs['out'], masks)
+            loss = loss_fn(outputs["out"], masks)
 
             # # compute metrics
             # y_preds = outputs['out'].data.cpu().numpy().ravel()
@@ -139,5 +140,5 @@ def train_model(input_path, epochs=10):
         print(f"val loss: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=50)
+model = train_model(config.INPUT_PATH, epochs=30)
 torch.save(model, config.SAVE_MODEL_PATH)
