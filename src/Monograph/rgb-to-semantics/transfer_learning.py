@@ -26,8 +26,8 @@ def prepare_data(input_path):
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     # # generate dataloader object for train and test set
-    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False, drop_last=True)
 
     # print
     print("len of train dataset:", len(train_dataset))
@@ -59,7 +59,7 @@ def train_model(input_path, epochs=10):
     loss_fn = torch.nn.MSELoss()
 
     #loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     # Use gpu if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

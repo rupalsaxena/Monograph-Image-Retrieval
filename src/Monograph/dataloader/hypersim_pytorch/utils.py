@@ -10,7 +10,7 @@ def get_rgb_from_jpg(path, setting, scene, frame):
     fullpath = os.path.join(path, rgb_path)
     rgb_img = Image.open(fullpath)
     transform = transforms.Compose([
-        transforms.Resize((240, 240)),
+        transforms.Resize((320, 420)),
         transforms.ToTensor()]) # Convert back to tensor
     rgb_img = transform(rgb_img)
     return rgb_img
@@ -19,7 +19,7 @@ def get_semantic_label(path, setting, scene, frame):
     semantic_path = f'ai_{setting}/images/scene_cam_{scene}_geometry_hdf5/frame.{frame}.semantic.hdf5'
     semantic_data = h5py.File(path + semantic_path)['dataset'][:]
     semantic_data = torch.from_numpy(semantic_data).unsqueeze(0)
-    semantic_data =  transforms.Resize((240, 240))(semantic_data)
+    semantic_data =  transforms.Resize((320, 420))(semantic_data)
     return semantic_data
 
 def get_semantic(path, setting, scene, frame):
@@ -27,7 +27,7 @@ def get_semantic(path, setting, scene, frame):
     semantic_path = f'ai_{setting}/images/scene_cam_{scene}_geometry_hdf5/frame.{frame}.semantic.hdf5'
     semantic_data = h5py.File(path + semantic_path)['dataset'][:].astype("float32")
     semantic_data = torch.from_numpy(semantic_data).float().unsqueeze(0)
-    resize = transforms.Resize((240, 240))
+    resize = transforms.Resize((400, 400))
     semantic_data = resize(semantic_data)
     return semantic_data
 
@@ -38,7 +38,7 @@ def get_depth(path, setting, scene, frame):
     depth_data = torch.from_numpy(depth_data).float()
     transform = transforms.Compose([
                     transforms.ToPILImage(), # Convert tensor to PIL image
-                    transforms.Resize((240, 240)), # Resize
+                    transforms.Resize((400, 400)), # Resize
                     transforms.ToTensor()]) # Convert back to tensor
     depth_data = transform(depth_data)
     return depth_data
