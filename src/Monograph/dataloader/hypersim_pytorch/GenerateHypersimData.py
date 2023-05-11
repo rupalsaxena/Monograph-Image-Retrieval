@@ -17,6 +17,9 @@ class GenerateHypersimData:
             for scene_id in scenes_info:
                 frames = scenes_info[scene_id]
                 for frame_id in frames:
+                    frame_int = int(frame_id)
+                    if frame_int > 20:
+                        continue
                     input_img = get_rgb_from_jpg(self._path, setting_id, scene_id, frame_id)
                     if self._purpose == "Depth":
                         targets = get_depth(self._path, setting_id, scene_id, frame_id)

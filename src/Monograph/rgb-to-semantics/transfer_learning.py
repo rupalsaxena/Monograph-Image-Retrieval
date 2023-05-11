@@ -20,13 +20,17 @@ def prepare_data(input_path):
 
     # split the data into train and test folder
     data_size = len(dataset)
-    train_size = int(0.8 * data_size)
+    train_size = int(0.9 * data_size)
     test_size = data_size - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     # # generate dataloader object for train and test set
-    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, drop_last=True)
+
+    # print
+    print("len of train dataset:", len(train_dataset))
+    print("len of test dataset:", len(test_dataset))
 
     return train_loader, test_loader, len(train_dataset), len(test_dataset)
 
@@ -36,8 +40,8 @@ def DeepLabV3(out_channels=45):
 
     print("init network")
     # init network
-    model = models.segmentation.deeplabv3_resnet50(pretrained=True) # , progress=True)
-    
+    model = models.segmentation.deeplabv3_resnet50(pretrained=True, progress=True)
+
     # updating classing to DeepLabHead for semantic segmentation
     model.classifier = DeepLabHead(2048, out_channels)
 
@@ -52,6 +56,7 @@ def train_model(input_path, epochs=10):
 
     # loss and optimizer init
     loss_fn = torch.nn.MSELoss()
+
     #loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
@@ -124,7 +129,7 @@ def train_model(input_path, epochs=10):
                 # b_auc_score.append(roc_auc_score(y_true.astype('uint8'), y_preds))
 
                 # accumulate loss
-                test_loss += loss.to("cpu")
+                test_loss += loss.to("cpu").detach()
 
             #test_f1score =  b_f1score.mean()
             #test_auc = b_auc_score.mean()
@@ -134,5 +139,5 @@ def train_model(input_path, epochs=10):
         print(f"val loss: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=20)
+model = train_model(config.INPUT_PATH, epochs=50)
 torch.save(model, config.SAVE_MODEL_PATH)
