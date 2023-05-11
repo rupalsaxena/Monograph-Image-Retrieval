@@ -1,12 +1,11 @@
 import os
 import argparse
-from dataloader import hypersim_config
-from generate_scene_graph import config as graph_config
+from generate_scene_graph import config
 from dataloader.hypersim.dataloader import hypersim_dataloader as dataloader 
 from generate_scene_graph.GenerateSceneGraph import GenerateSceneGraph as GSG
 
 def run_pipeline(settings):
-    output_folder = hypersim_config.HYPERSIM_GRAPHS
+    output_folder = config.HYPERSIM_GRAPHS
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -14,7 +13,7 @@ def run_pipeline(settings):
     for setting in settings:
         print("running for ai_", setting)
         # get img_data from setting
-        input_data = hypersim_config.HYPERSIM_DATAPATH
+        input_data = config.HYPERSIM_DATAPATH
         dl = dataloader(input_data)
         img_data = dl.get_dataset(setting)
 
@@ -25,7 +24,7 @@ def run_pipeline(settings):
             _gsg = GSG(img_obj)
 
             # skipping generating graphs if in vizualization mode, otherwise generate torch graphs
-            if not graph_config.viz:
+            if not config.viz:
                 graph = _gsg.get_torch_graph()
                 scene_id = img_obj.scene
                 if scene_id not in graphs.keys():
@@ -34,7 +33,7 @@ def run_pipeline(settings):
                     graphs[scene_id].append(graph)
 
         # skipping saving torch graph if in vizualization mode, otherwise saving torch graphs
-        if not graph_config.viz:
+        if not config.viz:
             import torch
             for scene_id in graphs:
                 filename = "ai_"+setting+"_"+scene_id+"_graphs.pt"
@@ -49,7 +48,7 @@ def main():
     if args.hypersim_setting is not None:
         settings = [args.hypersim_setting]
     else:
-        settings = hypersim_config.HYPERSIM_SETTINGS
+        settings = config.HYPERSIM_SETTINGS
     run_pipeline(settings)
 
 if __name__ == '__main__':
