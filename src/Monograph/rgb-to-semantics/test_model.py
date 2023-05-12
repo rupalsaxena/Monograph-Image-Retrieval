@@ -7,19 +7,16 @@ from torchvision import transforms
 sys.path.append("../dataloader/hypersim_pytorch/")
 from TorchDataloader import TorchDataloader
 
-from utils import output_mask
+from utils import output_mask_jpg, output_masks_hdf5, output_rgb_hdf5
 from MaskDataLoader import MaskDataLoader
 
-# TODO: saving hdf5 files part missing
-
 # load model
-MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/sem_20_50.pt"
+MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/test.pt"
 TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/test.pt"
 
 # images path
-save_format = "jpg" # "hdf5" or "jpg"
+save_format = "hdf5" # "hdf5" or "jpg"
 main_path = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/model_predictions/semantic_seg/"
-
 
 # create foldername based on format types
 if save_format == "jpg":
@@ -65,6 +62,7 @@ transform = transforms.Compose([transforms.ToPILImage()])
 
 print("ready to test")
 test_loss = 0
+
 # run on dataloader
 with torch.no_grad():
     for batch_idx, data in enumerate(test_loader):
@@ -80,12 +78,15 @@ with torch.no_grad():
         # output from network
         outputs = model(inputs)
         for i in range(len(inputs)):
-            input_img = transform(inputs[i])
-
             if save_format == "jpg":
+                input_img = transform(inputs[i])
                 input_img.save(os.path.join(rgb_path, f"rgb_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
-                output_mask(outputs["out"][i], os.path.join(preds_semantic_path, f"preds_sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
-                output_mask(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
+                output_mask_jpg(outputs["out"][i], os.path.join(preds_semantic_path, f"preds_sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
+                output_mask_jpg(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
+            elif save_format == "hdf5":
+                output_rgb_hdf5(inputs[i], os.path.join(rgb_path, f"rgb_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
+                output_masks_hdf5(outputs["out"][i], os.path.join(preds_semantic_path, f"preds_sem_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
+                output_masks_hdf5(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
 
         # compute loss and other metrics
         loss = loss_fn(outputs['out'], masks)
