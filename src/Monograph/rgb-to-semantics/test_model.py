@@ -7,7 +7,7 @@ from torchvision import transforms
 sys.path.append("../dataloader/hypersim_pytorch/")
 from TorchDataloader import TorchDataloader
 
-from utils import output_mask_jpg, output_masks_hdf5, output_rgb_hdf5
+from utils import *
 from MaskDataLoader import MaskDataLoader
 
 # load model
@@ -55,7 +55,8 @@ model.eval()
 torch.cuda.empty_cache()
 
 # define loss
-loss_fn = torch.nn.MSELoss()
+#loss_fn = torch.nn.MSELoss()
+loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
 
 # prepare tranform for saving images
 transform = transforms.Compose([transforms.ToPILImage()])
@@ -77,19 +78,22 @@ with torch.no_grad():
 
         # output from network
         outputs = model(inputs)
+
+        # save images
         for i in range(len(inputs)):
             if save_format == "jpg":
                 input_img = transform(inputs[i])
                 input_img.save(os.path.join(rgb_path, f"rgb_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
                 output_mask_jpg(outputs["out"][i], os.path.join(preds_semantic_path, f"preds_sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
-                output_mask_jpg(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
+                output_label_jpg(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.jpg"))
+
             elif save_format == "hdf5":
                 output_rgb_hdf5(inputs[i], os.path.join(rgb_path, f"rgb_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
                 output_masks_hdf5(outputs["out"][i], os.path.join(preds_semantic_path, f"preds_sem_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
-                output_masks_hdf5(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
+                output_label_hdf5(masks[i], os.path.join(semantic_path, f"sem_{setting[i]}_{scene[i]}_{frame[i]}.hdf5"))
 
         # compute loss and other metrics
-        loss = loss_fn(outputs['out'], masks)
+        loss = loss_fn(outputs['out'], masks.squeeze().long())
 
         # accumulate loss
         test_loss += loss.to("cpu")

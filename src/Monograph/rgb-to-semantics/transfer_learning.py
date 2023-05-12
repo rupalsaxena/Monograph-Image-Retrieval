@@ -36,7 +36,7 @@ def prepare_data(input_path):
     return train_loader, test_loader, len(train_dataset), len(test_dataset)
 
 # instantiate pretrained model
-def DeepLabV3(out_channels=45):
+def DeepLabV3(out_channels=46):
     torch.cuda.empty_cache()
 
     print("init network")
@@ -56,9 +56,9 @@ def train_model(input_path, epochs=10):
     print("init loss and optimizer")
 
     # loss and optimizer init
-    loss_fn = torch.nn.MSELoss()
+    # loss_fn = torch.nn.MSELoss()
 
-    #loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
+    loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     # Use gpu if available
@@ -77,7 +77,7 @@ def train_model(input_path, epochs=10):
         torch.cuda.empty_cache()
         for data in trainloader:
             inputs = data[0]
-            masks = data[1]
+            masks = data[1].squeeze().long()
 
             inputs = inputs.to(device)
             masks = masks.to(device)
@@ -112,7 +112,7 @@ def train_model(input_path, epochs=10):
         with torch.no_grad():
             for data in testloader:
                 inputs = data[0]
-                masks = data[1]
+                masks = data[1].squeeze().long()
 
                 inputs = inputs.to(device)
                 masks = masks.to(device)
