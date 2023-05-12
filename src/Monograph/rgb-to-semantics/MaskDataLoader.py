@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 class MaskDataLoader(Dataset):
     def __init__(self, data):
         self.data = data
-        self.num_classes = 46 # total 45 classes but 1 class is -1
+        # self.num_classes = 46 # total 45 classes but 1 class is -1
         
     def __len__(self):
         return len(self.data)
