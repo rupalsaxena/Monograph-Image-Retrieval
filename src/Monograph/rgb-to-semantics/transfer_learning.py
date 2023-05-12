@@ -140,5 +140,5 @@ def train_model(input_path, epochs=10):
         print(f"val loss: {test_loss/test_size:1.5f}")
     return model
 
-model = train_model(config.INPUT_PATH, epochs=30)
+model = train_model(config.INPUT_PATH, epochs=20)
 torch.save(model, config.SAVE_MODEL_PATH)
