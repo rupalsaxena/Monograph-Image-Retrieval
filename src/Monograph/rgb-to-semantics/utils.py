@@ -11,7 +11,6 @@ def output_mask_jpg(mask, path):
     mask = np.argmax(mask, axis=0)
     mask = mask.squeeze()
     H, W = mask.shape
-
     out_img = np.zeros((H, W, 3), dtype=np.uint8)
     for i in range(H):
         for j in range(W):

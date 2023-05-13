@@ -11,8 +11,8 @@ from utils import *
 from MaskDataLoader import MaskDataLoader
 
 # load model
-MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/test.pt"
-TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/test.pt"
+MODELPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/models/sem_img40_ep30_lr0001.pt"
+TESTDATAPATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimSemanticDataset_Train_40imgs.pt"
 
 # images path
 save_format = "hdf5" # "hdf5" or "jpg"
@@ -42,7 +42,7 @@ if not os.path.exists(preds_semantic_path):
 print("loading data!")
 test_dataset = torch.load(TESTDATAPATH)
 test_dataset = MaskDataLoader(test_dataset)
-test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False, drop_last=True)
 print("data ready!")
 
 # # run model to predict output
