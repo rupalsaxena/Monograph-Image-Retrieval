@@ -1,5 +1,7 @@
 import numpy as np
 from statistics import median
+import sys
+sys.path.append("../")
 import generate_scene_graph.config as config
 from generate_scene_graph.utils import get_pc_rgb
 from generate_scene_graph.NodeNode import NodeNode
