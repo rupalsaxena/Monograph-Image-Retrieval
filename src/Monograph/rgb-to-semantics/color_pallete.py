@@ -1,5 +1,5 @@
 palette = {
-    0: (0, 0, 0),           # background
+    0: (30, 30, 30),        # background
     1: (70, 70, 70),        # wall
     2: (0, 0, 255),         # floor
     3: (128, 0, 0),         # cabinet
@@ -43,4 +43,5 @@ palette = {
     41: (255, 215, 0),      # beam
     42: (128, 128, 215),    # don't know
     43: (255, 200, 20),     # don't know
-    44: (30, 150, 40)  }     # don't know
+    44: (30, 150, 40),      # don't know
+    -1: (0, 0, 0)  }        # unknown -1 semantic label
