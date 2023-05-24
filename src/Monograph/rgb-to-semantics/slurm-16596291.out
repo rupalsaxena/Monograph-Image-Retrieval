@@ -1,0 +1,64 @@
+Downloading: "https://download.pytorch.org/models/resnet50-19c8e357.pth" to /cluster/home/llingsch/.cache/torch/hub/checkpoints/resnet50-19c8e357.pth
+preparing dataset
+len of train dataset: 10607
+len of test dataset: 1179
+init network
+Traceback (most recent call last):
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 1350, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 1255, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 1301, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 1250, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 1010, in _send_output
+    self.send(msg)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 950, in send
+    self.connect()
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 1417, in connect
+    super().connect()
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/http/client.py", line 921, in connect
+    self.sock = self._create_connection(
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/socket.py", line 808, in create_connection
+    raise err
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/socket.py", line 796, in create_connection
+    sock.connect(sa)
+OSError: [Errno 101] Network is unreachable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "transfer_learning.py", line 143, in <module>
+    model = train_model(config.INPUT_PATH, epochs=20)
+  File "transfer_learning.py", line 54, in train_model
+    model = DeepLabV3()
+  File "transfer_learning.py", line 44, in DeepLabV3
+    model = models.segmentation.deeplabv3_resnet50(pretrained=True, progress=True)
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torchvision/models/segmentation/segmentation.py", line 94, in deeplabv3_resnet50
+    return _load_model('deeplabv3', 'resnet50', pretrained, progress, num_classes, aux_loss, **kwargs)
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torchvision/models/segmentation/segmentation.py", line 49, in _load_model
+    model = _segm_resnet(arch_type, backbone, num_classes, aux_loss, **kwargs)
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torchvision/models/segmentation/segmentation.py", line 20, in _segm_resnet
+    backbone = resnet.__dict__[backbone_name](
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torchvision/models/resnet.py", line 264, in resnet50
+    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torchvision/models/resnet.py", line 226, in _resnet
+    state_dict = load_state_dict_from_url(model_urls[arch],
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torch/hub.py", line 555, in load_state_dict_from_url
+    download_url_to_file(url, cached_file, hash_prefix, progress=progress)
+  File "/cluster/apps/nss/gcc-6.3.0/python_gpu/3.8.5/torch/hub.py", line 425, in download_url_to_file
+    u = urlopen(req)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 222, in urlopen
+    return opener.open(url, data, timeout)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 525, in open
+    response = self._open(req, data)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 542, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 502, in _call_chain
+    result = func(*args)
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 1393, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+  File "/cluster/apps/nss/gcc-6.3.0/python/3.8.5/x86_64/lib64/python3.8/urllib/request.py", line 1353, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 101] Network is unreachable>

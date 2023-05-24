@@ -34,7 +34,6 @@ class LoadAndTrain():
         self.learning_rate = configs['learning_rate']
         self.scheduler_step = configs['scheduler_step']
         self.scheduler_gamma = configs['scheduler_gamma']
-        self.pad = False
         self.threshold = configs['threshold']
 
         # training loss function
@@ -82,28 +81,17 @@ class LoadAndTrain():
         
         return train_triplets, test_triplets
 
-    def pad_inputs(self, a, p, n):
-        num_nodes = np.max([a.shape[0], p.shape[0], n.shape[0]])
-        num_attr = a.shape[1]
-
-        a_x = torch.zeros((num_nodes, num_attr), dtype=torch.float, device=self.device)
-        a_x[:a.shape[0], :] = a.float()
-
-        p_x = torch.zeros((num_nodes, num_attr), dtype=torch.float, device=self.device)
-        p_x[:p.shape[0], :] = p.float()
-
-        n_x = torch.zeros((num_nodes, num_attr), dtype=torch.float, device=self.device)
-        n_x[:n.shape[0], :] = n.float()
-
-        return a_x, p_x, n_x
-
     def train(self, path):
         # given:    self variables
         # return:   the trained model
+        
+        print('Loading data...')
         train_loader, test_loader = self.call_loader(path=path)
         self.model.train()
         
         training_profile = np.zeros((self.epochs, 6))
+
+        print('Beginning to train...')
         for epoch in range(self.epochs):
             start_epoch = default_timer()   # it's helpful to time this
 
@@ -141,7 +129,7 @@ class LoadAndTrain():
 
                 loss = self.loss_function(a_out, p_out, n_out)
                 train_loss += loss.item()
-                # print(train_loss)
+                
                 if torch.isnan(a_out[0]).item():
                     print(anc.y)
                 # if torch.isnan(p_out[0]).item():
@@ -196,10 +184,14 @@ class LoadAndTrain():
 
             self.scheduler.step()
         print(num_train_examples, num_test_examples)
+        print('Training complete...')
+
         if self.save_model:
+            print('Saving model...')
             torch.save(self.model, f'models/{self.model_path}')
 
         if self.training_figure:
+            print('Generating figure...')
 
             epochs = training_profile[:,0]
             train_loss = training_profile[:,2]
@@ -228,8 +220,8 @@ class LoadAndTrain():
             fig.tight_layout()  # otherwise the right y-label is slightly clipped
             ax2.legend(loc='lower left')
             # plt.figtext(0,0,self.configs)
-            plt.savefig(f"training_plots/hddn{self.hidden_channels}_lyrs{self.num_layers}_out{self.out_channels}_data{self.data_source}.png")
-            np.save(f"training_text/hddn{self.hidden_channels}_lyrs{self.num_layers}_out{self.out_channels}_data{self.data_source}", training_profile)
+            plt.savefig(f"training_plots/{self.model_path}.png")
+            np.save(f"training_text/{self.model_path}.txt", training_profile)
 
     def compute_distance(self, anchor_features, comparison_features):
         # given:    two data objects; 1 to be queried against, 1 being compared to the query
@@ -240,62 +232,89 @@ class LoadAndTrain():
 
         return distance.item()
 
-def run_trainer():
+def run_trainer(t, p):
     # use the configs to train a GCN, saving it in 'models/'
     euler_path = '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/3dssg/'
     singularity_path = '/mnt/datasets/3dssg/'
     train_configs1 = {
-        'learning_rate':   0.001,
-        'epochs':          10,
-        'batch_size':      1,
-        'num_train':       1100,
-        'num_test':        200,
-        'scheduler_step':  1,
-        'scheduler_gamma': 0.9,
-        'triplet_loss_margin': 1.0,
-        'triplet_loss_p':   2,
-        'in_channels': -1,
-        'hidden_channels': 128,
-        'num_layers': 5,
-        'out_channels': 64, 
-        'kernel_size': 1,
-        'use_pretrained': False,
-        'data_source':   'ssg', # pipeline or ssg
-        'save_model':   True,
-        'training_figure':  True,
-        'threshold':        2.5,
-        'path': '../../../data/3dssg/'
+        'learning_rate':        0.001,
+        'epochs':               10,
+        'batch_size':           1,
+        'num_train':            1100,
+        'num_test':             200,
+        'scheduler_step':       2,
+        'scheduler_gamma':      0.9,
+        'triplet_loss_margin':  1.0,
+        'triplet_loss_p':       2,
+        'in_channels':          -1,
+        'hidden_channels':      128,
+        'num_layers':           5,
+        'out_channels':         64, 
+        'kernel_size':          1,
+        'use_pretrained':       False,
+        'data_source':          'ssg', # pipeline or ssg
+        'save_model':           True,
+        'training_figure':      True,
+        'threshold':            1,
+        'path':                 '../../../data/3dssg/'
     }
     train_configs2 = {
-        'learning_rate':   0.001,
-        'epochs':          50,
-        'batch_size':      1,
-        'num_train':       30,
-        'num_test':        3,
-        'scheduler_step':  1,
-        'scheduler_gamma': 0.97,
-        'triplet_loss_margin': 1.0,
-        'triplet_loss_p':   2,
-        'in_channels': -1,
-        'hidden_channels': 128,
-        'num_layers': 5,
-        'out_channels': 64, 
-        'kernel_size': 1,
-        'use_pretrained': True,
-        'data_source':   'pipeline', # pipeline or ssg
-        'save_model':   True,
-        'training_figure':  True,
-        'threshold':        5.0,
-        'path': '../../../data/hypersim_graphs/'
+        'learning_rate':        0.001,
+        'epochs':               10,
+        'batch_size':           1,
+        'num_train':            150,
+        'num_test':             50,
+        'scheduler_step':       1,
+        'scheduler_gamma':      0.97,
+        'triplet_loss_margin':  1.0,
+        'triplet_loss_p':       2,
+        'in_channels':          -1,
+        'hidden_channels':      128,
+        'num_layers':           5,
+        'out_channels':         64, 
+        'kernel_size':          1,
+        'use_pretrained':       False,
+        'data_source':          'pipeline', # pipeline or ssg
+        'save_model':           True,
+        'training_figure':      True,
+        'threshold':            1.0,
+        'path':                 '../../../data/hypersim_graphs/'
+    }
+    train_configs3 = {
+        'learning_rate':        0.001,
+        'epochs':               10,
+        'batch_size':           1,
+        'num_train':            200,
+        'num_test':             50,
+        'scheduler_step':       1,
+        'scheduler_gamma':      0.97,
+        'triplet_loss_margin':  1.0,
+        'triplet_loss_p':       2,
+        'in_channels':          -1,
+        'hidden_channels':      128,
+        'num_layers':           5,
+        'out_channels':         64, 
+        'kernel_size':          1,
+        'use_pretrained':       False,
+        'data_source':          'pipeline', # pipeline or ssg
+        'save_model':           True,
+        'training_figure':      True,
+        'threshold':            t,
+        'path':                 p,
     }
     if torch.cuda.is_available():
         device='cuda:0'
     else:
         device='cpu'
 
-    train_configs = train_configs2
-    model_name = 'pretrained_on_3dssg'
+    # pdb.set_trace()
+    train_configs = train_configs3
+    if p == '../../../data/hypersim_graphs/':
+        model_name = f'GT_threshold:{train_configs["threshold"]}'
+    elif p == '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/':
+        model_name = f'ResNet50_threshold:{train_configs["threshold"]}'
+
     trainer = LoadAndTrain(train_configs, device, model_name)
     trainer.train(train_configs['path'])
 
-run_trainer()
+run_trainer(int(sys.argv[1]), sys.argv[2])
