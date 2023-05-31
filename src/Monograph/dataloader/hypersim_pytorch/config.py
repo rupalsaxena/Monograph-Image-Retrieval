@@ -4,9 +4,10 @@
 
 # euler path
 HYPERSIM_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim/"
-OUTPUT_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimSemanticDataset_Test_40imgs.pt"
+# OUTPUT_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimSemanticDataset_Test_40imgs.pt"
+OUTPUT_PATH = "/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/torch_hypersim/HypersimDepthDataset_Test_40imgs.pt"
 
-PURPOSE = "Semantic" # "Depth" / "Semantic"
+PURPOSE = "Depth" # "Depth" / "Semantic"
 
 SETTINGS = [
     # train data

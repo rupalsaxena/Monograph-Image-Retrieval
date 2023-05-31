@@ -44,7 +44,7 @@ class GenerateHypersimData:
                 scene_path = os.path.join(foldername, scene)
                 frame_files = os.listdir(scene_path)
                 frame_ids = []
-
+                
                 for frame in frame_files:
                     if (
                         (self._purpose=="Depth" and frame.startswith("frame.") and frame.endswith("depth_meters.hdf5")) 

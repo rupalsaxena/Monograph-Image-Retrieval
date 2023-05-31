@@ -2,11 +2,13 @@ import os
 import config
 from ImgObj import ImgObj
 from utils import *
+import pdb
 
 class PredictionDataloader:
     def __init__(self, setting):
         self.sem_pred_path = config.SEM_PATH
         self.hypersim_path = config.HYPERSIM_PATH
+        self.depth_path = config.DEPTH_PATH
         self.querry_setting = setting
         self.load_data()
     
@@ -18,14 +20,15 @@ class PredictionDataloader:
             _split = pred_file.split("_")
             setting_id = _split[-4] + "_" + _split[-3]
         
-            if setting_id == self.querry_setting:
+            if setting_id == self.querry_setting and _split[-2] == '00':
                 frame_id = _split[-1].split(".")[0]
                 scene_id = _split[-2]
 
                 img = ImgObj(setting_id, scene_id, frame_id)
-
+                
                 semantic_img = get_semantic(self.sem_pred_path, pred_file)
-                depth_img = get_depth(self.hypersim_path, setting_id, scene_id, frame_id)
+                # depth_img = get_depth(self.hypersim_path, setting_id, scene_id, frame_id)
+                depth_img = get_depth_pred(self.depth_path, setting_id, scene_id, frame_id)
                 rgb_img = get_rgb(self.hypersim_path, setting_id, scene_id, frame_id)
 
                 img.set_sematic(semantic_img)

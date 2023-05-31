@@ -5,7 +5,7 @@ sys.path.append("../")
 import generate_scene_graph.config as config
 from generate_scene_graph.utils import get_pc_rgb
 from generate_scene_graph.NodeNode import NodeNode
-
+import pdb
 class GenerateSceneGraph:
     def __init__(self, img_set):
         self._img_set = img_set
@@ -51,6 +51,7 @@ class GenerateSceneGraph:
     def find_medians(self):
         # find medians of each object in image
         self.medians = {}
+        index=0
         for id in self.sem_uniq:
             xs = np.array(self.ids_3d_points[id])[:,0]
             ys = np.array(self.ids_3d_points[id])[:,1]
@@ -71,6 +72,7 @@ class GenerateSceneGraph:
         from torch_geometric.data import Data
         # get node information
         x_nodes = torch.empty(size=(1,4), dtype=torch.float32)
+
         for sem_id in self.sem_uniq:
             x_nodes = torch.cat([x_nodes, torch.tensor([[
                     sem_id.astype("float32"),
@@ -79,6 +81,7 @@ class GenerateSceneGraph:
                     self.colors[sem_id][2].astype("float32")
                 ]])
             ])
+
         x_nodes = x_nodes[1:]
         # get edge attributes and edge index
         edge_attribute = torch.tensor([[]], dtype=torch.float32)
