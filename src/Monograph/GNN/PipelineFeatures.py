@@ -370,12 +370,16 @@ def main_compute_recalls():
     # compute the recalls for all the different models / scenarios over the given range of thresholds
 
     thresholds = [1, 2, 5, 10, 100]
-    models = ['GT', 'ResNet50', 'ResNet50', 'ResNet50']
-    # the paths correspond to the model which the data has been trained on! These should not be switched around at random
-    paths = ['../../../data/hypersim_graphs/', 
-                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/',
-                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet50/',
-                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet101/']
+    models = ["GT"]
+    paths = ['../../../data/hypersim_test_graphs_GT/']
+
+    # To run on several models together
+    # models = ['GT', 'ResNet50', 'ResNet50', 'ResNet50']
+    # # the paths correspond to the model which the data has been trained on! These should not be switched around at random
+    # paths = ['../../../data/hypersim_graphs/', 
+    #             '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/',
+    #             '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet50/',
+    #             '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet101/']
 
     for col in range(len(models)):
 

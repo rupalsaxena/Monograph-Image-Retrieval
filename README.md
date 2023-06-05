@@ -2,13 +2,52 @@
 
 The goal of this project was to use recent advances in monocular depth, instance segmentation, scene graphs, and graph neural networks to push the state-of-the-art in indoor image retrieval.
 
-## Setup environment in euler cluster of ETHZ 
-Clone this public repo: 
-```
-git clone https://github.com/rupalsaxena/Monograph-Image-Retrieval.git
-```
-TODO: add virtual env in package, how to run virtual environment, ask for space using slurm or something and then run the project
+We are using docker container so that all the users can have same working environment.
 
+## Docker using Singularity in ETHZ HPC euler
+To use Singularity in euler, your NETHZ username has to be added to ID-HPC-SINGULARITY group.
+
+Request a compute node with Singularity. This step will take some time. 
+```
+srun --pty --mem-per-cpu=4G --gpus=1 bash
+```
+
+Load module eth_proxy to connect to the internet from a compute node
+```
+module load eth_proxy
+```
+
+Navigate to $SCRATCH
+```
+cd $SCRATCH
+```
+
+Pull the Docker image with Singularity.
+```
+singularity pull docker://rupalsaxena/3dvision_grp11
+```
+
+Check if singularity file is available
+```
+ls 
+```
+
+Running ```ls``` above should return:
+***3dvision_grp11_latest.sif***
+
+If this file is available, you are good to go. Otherwise, contact maintainer of docker container of this repo. 
+
+Run the container as follows. ***Note: euler_username = your euler username***
+```
+singularity run --bind /cluster/home/euler_username:/cluster/home/euler_username --bind /cluster/project/infk/courses/252-0579-00L/group11_2023:/cluster/project/infk/courses/252-0579-00L/group11_2023 3dvision_grp11_latest.sif 
+```
+Keep this repo in /cluster/home/euler_username path so that your repo can be mounted automatically inside docker.
+
+Once you run this, you are inside the singularity docker. 
+1. Navigate to /cluster/home/euler_username folder to see this repo inside the docker.
+2. Navigate to /cluster/project/infk/courses/252-0579-00L/group11_2023 folder to see the data inside the docker.
+
+If you can see both the folders mentioned above, congratulations, your infrastructure is ready!
 
 ## Pipeline overview
 Shown below is the pipeline overview of this project. 
@@ -99,14 +138,26 @@ python3 preds_to_graphs.py
 ```
 
 ## Train GCN network with Triplet loss using Generated Scene Graphs
+To train the model from groundtruth generated graphs, run the following commands:
 ```
+# navigate to GNN directory
+cd src/Monograph/GNN
 
+# run ground truth graph GCN training with threshold 2
+python3 LoadAndTrain.py 2 ../../../data/hypersim_train_graphs_GT/
 ```
 
 ## Proximity Matching
+To perform image retrival on example test data with different thresholds, run the following commands:
+```
+# navigate to GNN directory
+cd src/Monograph/GNN
+
+# run proximity matching
+python3 PipelineFeatures.py
 ```
 
-```
+
 
 
 
@@ -131,8 +182,6 @@ python3 preds_to_graphs.py
 
 
 <!---
-
-
 
 # Monograph-Image-Retrieval
 The goal of this project is to use recent advances in monocular depth, instance segmentation, scene graphs, and graph neural networks to push the state-of-the-art in indoor image retrieval.
