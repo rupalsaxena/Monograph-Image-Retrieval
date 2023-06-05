@@ -3,7 +3,6 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 import os
-import pdb
 
 class pipeline_graph_loader():
     def __init__(self, threshold, path='/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs/'):

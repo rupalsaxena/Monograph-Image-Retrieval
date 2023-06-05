@@ -1,8 +1,3 @@
-"""
-Created on Sun Apr 9 2023
-
-@author: Levi Lingsch
-"""
 import torch
 import numpy as np
 import torch.nn.functional as F
@@ -74,7 +69,6 @@ class LoadAndTrain():
             train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
             test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False, nyu=True, eig=False, rio=False, g_id=False, ply=True)
         elif self.data_source == 'pipeline':
-            # pdb.set_trace()
             loader = pipeline_graph_loader(self.threshold, path=path)
             train_triplets = loader.load_triplet_dataset(0, self.num_train, batch_size=self.batch_size, shuffle=False)
             test_triplets = loader.load_triplet_dataset(self.num_train, self.num_train + self.num_test, batch_size=1, shuffle=False)
@@ -126,17 +120,11 @@ class LoadAndTrain():
                 if distance_to_n > distnace_to_p:
                     train_accuracy += 1
 
-
                 loss = self.loss_function(a_out, p_out, n_out)
                 train_loss += loss.item()
                 
                 if torch.isnan(a_out[0]).item():
                     print(anc.y)
-                # if torch.isnan(p_out[0]).item():
-                #     print(pos.y)
-                # if torch.isnan(n_out[0]).item():
-                #     print(neg.y)
-                    
 
 
                 self.optimizer.zero_grad()
@@ -313,6 +301,8 @@ def run_trainer(t, p):
         model_name = f'GT_threshold:{train_configs["threshold"]}'
     elif p == '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/':
         model_name = f'ResNet50_threshold:{train_configs["threshold"]}'
+    else:
+        model_name = "example_model"
 
     trainer = LoadAndTrain(train_configs, device, model_name)
     trainer.train(train_configs['path'])

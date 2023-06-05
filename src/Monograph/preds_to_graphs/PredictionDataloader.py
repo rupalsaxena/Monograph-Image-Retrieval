@@ -2,7 +2,6 @@ import os
 import config
 from ImgObj import ImgObj
 from utils import *
-import pdb
 
 class PredictionDataloader:
     def __init__(self, setting):

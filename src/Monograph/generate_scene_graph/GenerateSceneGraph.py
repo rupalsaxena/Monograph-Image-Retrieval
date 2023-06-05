@@ -5,7 +5,7 @@ sys.path.append("../")
 import generate_scene_graph.config as config
 from generate_scene_graph.utils import get_pc_rgb
 from generate_scene_graph.NodeNode import NodeNode
-import pdb
+
 class GenerateSceneGraph:
     def __init__(self, img_set):
         self._img_set = img_set
