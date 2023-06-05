@@ -25,7 +25,7 @@ indoor scenes, accompanied by per-pixel ground truth labels. This data consists 
 Download the data from the link: [HypersimData](https://github.com/apple/ml-hypersim)
 
 ## RGB to Semantic Instances
-**STEP 1**: Save rgb and groundtruth semantic instances in torch format using dataloader
+**STEP 1**: Save rgb and groundtruth semantic instances in torch format using dataloader.
 ```
 # navigate to hypersim dataloader
 cd src/Monograph/dataloader/hypersim_pytorch
@@ -38,15 +38,25 @@ python3 save_hypersim_dataset.py
 ```
 Data will be saved in your provided output path in torch format.
 
-**STEP 2**: Train DeepLabv3 Resnet50 Model using transfer learning
+**STEP 2**: Train DeepLabv3 Resnet50 Model using transfer learning.
 ```
+# navigate to rgb-to-semantics directory
+cd ../../rgb-to-semantics 
+```
+Update input path and trained model output path in config.py
+Train the model
+```
+python3 transfer_learning.py
+```
+Once training is over, check the provided output path to see trained model.
 
-```
 
-**STEP 3**: Test and save the predicted semantic data
+**STEP 3**: Save predicted semantic data.
+Update MODELPATH TESTDATAPATH, main_path in test_model.py file. Finally, run the file to get predicted semantic instances.
 ```
-
+python3 test_model.py
 ```
+Check the predicted semantic images in main_path provided in config.py file.
 
 ## RGB to Depth 
 Step 1: Load and save rgb and groundtruth depth in torch format using dataloader
