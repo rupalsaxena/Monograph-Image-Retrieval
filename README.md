@@ -20,6 +20,8 @@ The goal of this project was to use recent advances in monocular depth, instance
         - rgb-to-semantics        # rgb to semantic training and prediction
 ```
 
+List of packages used in this project can be found in file [requirements.txt](https://github.com/rupalsaxena/Monograph-Image-Retrieval/blob/main/docker/gpu-docker/requirements.txt)
+
 
 ## Setting up Infrastructure using Singularity in ETHZ HPC euler
 We are using docker container so that all the users can have same working environment. You can either use Singularity in ETHZ HPC euler or directly use docker container in your local machine. 
