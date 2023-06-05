@@ -1,12 +1,6 @@
-"""
-Created on Sun Apr 9 2023
-
-@author: Levi Lingsch
-"""
 import torch
 import pandas as pd
 import numpy as np
-import pdb
 import os
 from timeit import default_timer
 import matplotlib.pyplot as plt
@@ -14,7 +8,6 @@ import random
 
 class PipelineFeatures():
     def __init__(self, model, threshold):
-        # self.graph = graph
         if torch.cuda.is_available():
             self.device='cuda:0'
         else:
@@ -88,7 +81,6 @@ class PipelineFeatures():
         
         distance_df = pd.DataFrame(distance_df)
         distance_df = distance_df.sort_values(by=['Distance'])
-        # sorted_distance, sorted_indeces = torch.sort(distances)
     
         return distance_df.head(n)
             

@@ -2,9 +2,9 @@
 
 The goal of this project was to use recent advances in monocular depth, instance segmentation, scene graphs, and graph neural networks to push the state-of-the-art in indoor image retrieval.
 
-We are using docker container so that all the users can have same working environment.
+We are using docker container so that all the users can have same working environment. You can either use Singularity in ETHZ HPC euler or directly use docker container in your local machine. 
 
-## Docker using Singularity in ETHZ HPC euler
+## Setting up Infrastructure using Singularity in ETHZ HPC euler
 To use Singularity in euler, your NETHZ username has to be added to ID-HPC-SINGULARITY group.
 
 Request a compute node with Singularity. This step will take some time. 

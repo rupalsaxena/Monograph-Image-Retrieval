@@ -56,8 +56,6 @@ def train_model(input_path, epochs=10):
     print("init loss and optimizer")
 
     # loss and optimizer init
-    # loss_fn = torch.nn.MSELoss()
-
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
@@ -89,12 +87,6 @@ def train_model(input_path, epochs=10):
 
             # compute loss
             loss = loss_fn(outputs["out"], masks)
-
-            # # compute metrics
-            # y_preds = outputs['out'].data.cpu().numpy().ravel()
-            # y_true = masks.data.cpu().numpy().ravel()
-            # b_f1score.append(f1_score(y_true > 0, y_preds > 0.1))
-            # b_auc_score.append(roc_auc_score(y_true.astype('uint8'), y_preds))
         
             # perform update
             loss.backward()
@@ -102,10 +94,6 @@ def train_model(input_path, epochs=10):
 
             # accumulate loss
             train_loss += loss.to("cpu").detach()
-
-        # update metrics
-        # train_f1score =  b_f1score.mean()
-        # train_auc = b_auc_score.mean()
         
         model.eval()
         torch.cuda.empty_cache()
@@ -123,17 +111,8 @@ def train_model(input_path, epochs=10):
                 # compute loss
                 loss = loss_fn(outputs['out'], masks)
 
-                # # compute metrics
-                # y_preds = outputs['out'].data.cpu().numpy().ravel()
-                # y_true = masks.data.cpu().numpy().ravel()
-                # b_f1score.append(f1_score(y_true > 0, y_preds > 0.1))
-                # b_auc_score.append(roc_auc_score(y_true.astype('uint8'), y_preds))
-
                 # accumulate loss
                 test_loss += loss.to("cpu").detach()
-
-            #test_f1score =  b_f1score.mean()
-            #test_auc = b_auc_score.mean()
 
         print(f"\rEpoch {epoch+1}")
         print(f"train loss: {train_loss/train_size:1.5f}") 

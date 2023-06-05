@@ -1,8 +1,3 @@
-"""
-Created on Sun Apr 9 2023
-
-@author: Levi Lingsch
-"""
 import torch
 import numpy as np
 import torch.nn.functional as F

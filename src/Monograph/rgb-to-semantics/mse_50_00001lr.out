@@ -1,205 +1,0 @@
-preparing dataset
-len of train dataset: 5426
-len of test dataset: 603
-init network
-init loss and optimizer
-running for epoch: 0
-Epoch 1
-train loss: 0.00347
-val loss: 0.00252
-running for epoch: 1
-Epoch 2
-train loss: 0.00256
-val loss: 0.00230
-running for epoch: 2
-Epoch 3
-train loss: 0.00227
-val loss: 0.00208
-running for epoch: 3
-Epoch 4
-train loss: 0.00202
-val loss: 0.00189
-running for epoch: 4
-Epoch 5
-train loss: 0.00177
-val loss: 0.00175
-running for epoch: 5
-Epoch 6
-train loss: 0.00165
-val loss: 0.00167
-running for epoch: 6
-Epoch 7
-train loss: 0.00147
-val loss: 0.00154
-running for epoch: 7
-Epoch 8
-train loss: 0.00137
-val loss: 0.00154
-running for epoch: 8
-Epoch 9
-train loss: 0.00131
-val loss: 0.00147
-running for epoch: 9
-Epoch 10
-train loss: 0.00124
-val loss: 0.00139
-running for epoch: 10
-Epoch 11
-train loss: 0.00117
-val loss: 0.00138
-running for epoch: 11
-Epoch 12
-train loss: 0.00115
-val loss: 0.00132
-running for epoch: 12
-Epoch 13
-train loss: 0.00110
-val loss: 0.00131
-running for epoch: 13
-Epoch 14
-train loss: 0.00104
-val loss: 0.00125
-running for epoch: 14
-Epoch 15
-train loss: 0.00102
-val loss: 0.00122
-running for epoch: 15
-Epoch 16
-train loss: 0.00098
-val loss: 0.00122
-running for epoch: 16
-Epoch 17
-train loss: 0.00097
-val loss: 0.00124
-running for epoch: 17
-Epoch 18
-train loss: 0.00092
-val loss: 0.00120
-running for epoch: 18
-Epoch 19
-train loss: 0.00089
-val loss: 0.00115
-running for epoch: 19
-Epoch 20
-train loss: 0.00087
-val loss: 0.00137
-running for epoch: 20
-Epoch 21
-train loss: 0.00090
-val loss: 0.00122
-running for epoch: 21
-Epoch 22
-train loss: 0.00085
-val loss: 0.00117
-running for epoch: 22
-Epoch 23
-train loss: 0.00086
-val loss: 0.00118
-running for epoch: 23
-Epoch 24
-train loss: 0.00083
-val loss: 0.00112
-running for epoch: 24
-Epoch 25
-train loss: 0.00084
-val loss: 0.00119
-running for epoch: 25
-Epoch 26
-train loss: 0.00083
-val loss: 0.00114
-running for epoch: 26
-Epoch 27
-train loss: 0.00081
-val loss: 0.00111
-running for epoch: 27
-Epoch 28
-train loss: 0.00080
-val loss: 0.00111
-running for epoch: 28
-Epoch 29
-train loss: 0.00082
-val loss: 0.00118
-running for epoch: 29
-Epoch 30
-train loss: 0.00081
-val loss: 0.00112
-running for epoch: 30
-Epoch 31
-train loss: 0.00078
-val loss: 0.00110
-running for epoch: 31
-Epoch 32
-train loss: 0.00077
-val loss: 0.00110
-running for epoch: 32
-Epoch 33
-train loss: 0.00079
-val loss: 0.00108
-running for epoch: 33
-Epoch 34
-train loss: 0.00076
-val loss: 0.00104
-running for epoch: 34
-Epoch 35
-train loss: 0.00075
-val loss: 0.00108
-running for epoch: 35
-Epoch 36
-train loss: 0.00076
-val loss: 0.00107
-running for epoch: 36
-Epoch 37
-train loss: 0.00074
-val loss: 0.00110
-running for epoch: 37
-Epoch 38
-train loss: 0.00074
-val loss: 0.00106
-running for epoch: 38
-Epoch 39
-train loss: 0.00075
-val loss: 0.00104
-running for epoch: 39
-Epoch 40
-train loss: 0.00074
-val loss: 0.00115
-running for epoch: 40
-Epoch 41
-train loss: 0.00075
-val loss: 0.00112
-running for epoch: 41
-Epoch 42
-train loss: 0.00073
-val loss: 0.00110
-running for epoch: 42
-Epoch 43
-train loss: 0.00072
-val loss: 0.00107
-running for epoch: 43
-Epoch 44
-train loss: 0.00074
-val loss: 0.00115
-running for epoch: 44
-Epoch 45
-train loss: 0.00073
-val loss: 0.00106
-running for epoch: 45
-Epoch 46
-train loss: 0.00071
-val loss: 0.00105
-running for epoch: 46
-Epoch 47
-train loss: 0.00072
-val loss: 0.00109
-running for epoch: 47
-Epoch 48
-train loss: 0.00071
-val loss: 0.00102
-running for epoch: 48
-Epoch 49
-train loss: 0.00070
-val loss: 0.00103
-running for epoch: 49
-Epoch 50
-train loss: 0.00071
-val loss: 0.00103
