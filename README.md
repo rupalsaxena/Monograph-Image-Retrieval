@@ -73,7 +73,7 @@ If you can see both the folders mentioned above, congratulations, your infrastru
 ## Pipeline overview
 Shown below is the pipeline overview of this project. 
 
-![Alt text](https://github.com/rupalsaxena/Monograph-Image-Retrieval/blob/final_code/images/pipeline.png)
+![Alt text](https://github.com/rupalsaxena/Monograph-Image-Retrieval/blob/main/images/pipeline.png)
 
 We will see how to run each element of this pipeline one by one.
 
