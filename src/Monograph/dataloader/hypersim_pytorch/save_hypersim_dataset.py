@@ -19,5 +19,5 @@ print("data ready!")
 #     print(f"Data {batch_idx} shape: {images.shape}, {targets.shape}")
 
 # # save the dataset object for loading it later
-output = config.OUTPUT_PATH
-torch.save(data, output)
+output = config.OUTPUT_PATH 
+torch.save(data, output)    

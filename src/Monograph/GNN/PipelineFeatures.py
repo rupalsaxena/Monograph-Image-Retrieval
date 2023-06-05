@@ -7,6 +7,10 @@ import torch
 import pandas as pd
 import numpy as np
 import pdb
+import os
+from timeit import default_timer
+import matplotlib.pyplot as plt
+import random
 
 class PipelineFeatures():
     def __init__(self, model, threshold):
@@ -150,19 +154,14 @@ def clean_up_graphs():
     #     torch.save(new_graphs, f'{path}{scene}')
 # clean_up_graphs()
 
-def run_pipeline_example(threshold, path):
-    import os
-    from timeit import default_timer
-    import matplotlib.pyplot as plt
+def run_pipeline_example(threshold, model, path):
 
     test_samples = 10
     positive_samples = 30
     
     # load the model
-    print('Loading model...')
-    model = 'pretrained_on_3dssg'
-    # threshold = 1
-    # model = 'trained_on_large_hypersim_set'
+    print(f'Loading model {model}...')
+
     pipeline = PipelineFeatures(f'models/{model}', threshold)
 
     # path='../../../data/hypersim_graphs/'
@@ -223,10 +222,10 @@ def run_pipeline_example(threshold, path):
             best_match = pipeline.n_best_from_features(test_features, feature_database, n=k+1)
 
             test_graph_scene = test_graph.y[0]
-            if k == 9:
-                print("scene to match")
-                print(test_graph.y)
-                print("predicted matches")
+            # if k == 9:
+                # print("scene to match")
+                # print(test_graph.y)
+                # print("predicted matches")
 
             local_recall = 0
             for match_index in range(k+1):
@@ -236,58 +235,172 @@ def run_pipeline_example(threshold, path):
                     # recall_at_k[k] += 1/(positive_samples)
                     local_recall = 1
 
-            if k == 9:
-                print(best_match)
+            # if k == 9:
+                # print(best_match)
                     # print(best_match['Scene'].iloc[match_index] best_match['Mid'].iloc[match_index] best_match['Frame'].iloc[match_index])
             
             recall_at_k[k] += local_recall
-            
-            
             num_tested += 1
+
         precision_at_k[k] /= num_tested
         recall_at_k[k] /= num_tested
         maximum_recall_at_k[k] /= num_tested
 
-    # print(precision_at_k)
-    # print(recall_at_k)
-    # print(maximum_recall_at_k)
-
-    # k = np.arange(1,11)
-    # plt.figure()
-    # # plt.plot(k, precision_at_k, color='blue', label='average precision')
-    # plt.plot(k, recall_at_k, color='red', label='average recall')
-    # # plt.plot(k, maximum_recall_at_k, '-.',color='red', label='maximum average recall')
-    # plt.legend()
-    # plt.grid()
-    # plt.xlabel('k')
-    # plt.ylabel('Value as a Fraction')
-    # plt.title(f'Performance of {model} Model')
-    # plt.savefig(f'training_plots/precision_and_recall_at_k_for_{model}.png')
-
     return recall_at_k, precision_at_k
         
 
-thresholds = [2]
-models = ['GT', 'ResNet50']
-paths = ['../../../data/hypersim_graphs/', 
-             '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/']
-recalls = np.zeros((len(thresholds), 2, 10))
-precision = np.zeros((len(thresholds), 2, 10))
-for col in range (2):
-    for row, threshold in enumerate(thresholds):
-        path  = paths[col]
-        model = f'{models[col]}_threshold:{threshold}'
+# thresholds = [2]
+# models = ['GT', 
+#             'ResNet50']
+# paths = ['../../../data/hypersim_graphs/', 
+#             '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/',]
+#             #  '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet50/',
+#             #  '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet101/']
 
+# recalls = np.zeros((len(thresholds), 2, 10))
+# precision = np.zeros((len(thresholds), 2, 10))
 
+# for col in range (2):
+#     for row, threshold in enumerate(thresholds):
+#         path  = paths[col]
+#         model = f'{models[col]}_threshold:{threshold}'
         
-        print(threshold)
-        print(model)
-        print(path)
-        recalls[row, col, :], precision[row,col,:] = run_pipeline_example(threshold, path)
-        # print('Recall at k')
-        # for index in range(10):
-            # print(recalls[row, col, index])
+#         print(threshold)
+#         print(model)
+#         print(path)
+#         recalls[row, col, :], precision[row,col,:] = run_pipeline_example(threshold, model, path)
 
-        # print('Precision at k')
-        # for index in range(10):
-            # print(precision[row, col, index])
+#         print('Recall at k')
+#         for index in range(10):
+#             print(recalls[row, col, index])
+
+#         print('Precision at k')
+#         for index in range(10):
+#             print(precision[row, col, index])
+
+
+def rerun_database_examples(threshold, model, path):
+    # we can re-order the data base to take a set of queries from each set of scenes separately.
+    test_samples = 30
+    positive_samples = 7
+    
+    # load the model
+    # print(f'Loading model {model}...')
+
+    pipeline = PipelineFeatures(f'models/{model}', threshold)
+
+    scene_files = os.listdir(path)
+
+    # create the scenes to create the database from which we will need to search
+    # print('Creating scene database...')
+    database_scenes = torch.load(f'{path}{scene_files[0]}')[:41]
+    database_scenes.extend(torch.load(f'{path}{scene_files[2]}')[:41]) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[1]}')[:41]) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[3]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[4]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[5]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[6]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[7]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[8]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[9]}')[:41] )
+    database_scenes.extend(torch.load(f'{path}{scene_files[10]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[11]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[12]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[13]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[14]}')[:41] ) 
+    database_scenes.extend(torch.load(f'{path}{scene_files[15]}')[:41] ) 
+    # print(f"Number of database scenes: {len(database_scenes)}")
+    
+
+    # create a dataset
+    t1 = default_timer()
+    feature_database = pipeline.feature_database(database_scenes)
+    t2 = default_timer()
+    # print(f"Time to get database feature: {t2-t1:4f}")
+
+    # let's just look at recall at 1, 5, 10
+    k_set = [1, 5, 10]
+    precision_at_k = np.zeros(len(k_set))
+    recall_at_k = np.zeros(len(k_set))
+    maximum_recall_at_k = np.zeros(len(k_set))
+
+    for k_idx, k in enumerate(k_set):
+        num_tested = 0
+
+        # there are 16 different scenes, we will loop through and select the 41 elements corresponding to that scene
+        for test_num in range(16):
+            # these correspond to a random set of query images and positive samples
+            test_set = feature_database[test_num*41:(test_num+1)*41]
+            random.shuffle(test_set)
+            query_set = test_set[:30]
+            positive_samples = test_set[-7:]
+
+            # distractor database will have to be constructed from all others
+            distractors_and_positives = positive_samples
+            distractors_and_positives.extend(feature_database[:test_num*41])
+            distractors_and_positives.extend(feature_database[(test_num+1)*41:])
+
+            # for each query 
+            for test_graph in query_set:
+                # retrieve the features and k best matches
+                best_match = pipeline.n_best_from_features(test_graph, distractors_and_positives, n=k)
+
+                test_graph_scene = test_graph[1][0]
+
+                local_recall = 0
+
+                # for all returned graphs
+                for match_index in range(k):
+                    if best_match['Scene'].iloc[match_index] == test_graph_scene:
+                        precision_at_k[k_idx] += 1/(k)
+
+                        # returns 1 if a match was found
+                        local_recall = 1
+
+                recall_at_k[k_idx] += local_recall
+                num_tested += 1
+                
+        precision_at_k[k_idx] /= num_tested
+        recall_at_k[k_idx] /= num_tested
+
+    return recall_at_k, precision_at_k
+
+
+def main_compute_recalls():
+    # compute the recalls for all the different models / scenarios over the given range of thresholds
+
+    thresholds = [1, 2, 5, 10, 100]
+    models = ['GT', 'ResNet50', 'ResNet50', 'ResNet50']
+    # the paths correspond to the model which the data has been trained on! These should not be switched around at random
+    paths = ['../../../data/hypersim_graphs/', 
+                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_sem_resnet50/',
+                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet50/',
+                '/cluster/project/infk/courses/252-0579-00L/group11_2023/datasets/hypersim_graphs_depth_resnet101/']
+
+    for col in range(len(models)):
+
+        # print results to terminal
+        print('################')
+        if col == 0:
+            print('Ground Truth')
+        if col == 1:
+            print('GT Depth + Semantic Predictions')
+        if col == 2:
+            print('Depth (RN50) + Semantic Predictions')
+        if col == 3:
+            print('Depth (RN101) + Semantic Predictions')
+        print('################')
+
+        for row, threshold in enumerate(thresholds):
+            path  = paths[col]
+            model = f'{models[col]}_threshold:{threshold}'
+            
+            print(threshold)
+            print(model)
+            # print(path)
+            recalls, precisions = rerun_database_examples(threshold, model, path)
+
+            print('Recall at k = [1, 5, 10]')
+            print(recalls)
+
+main_compute_recalls()
