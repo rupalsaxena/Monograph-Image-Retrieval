@@ -69,12 +69,30 @@ cd ../rgb-to-depth
 Update image_dir and image_dir_out folders in test_depth.py before running it. Once updated, run the following:
 ```
 python3 test_depth.py 
+cd ../../../
 ```
 Predicted depth data should be available on image_dir_out path mentioned above.
 
 ## Generate Scene Graph
+To generate graphs from ground truth depth and ground truth semantic instances of hypersim data, do as follows:
+
+Step 1: Update HYPERSIM_DATAPATH and HYPERSIM_GRAPHS path in "src/Monograph/generate_scene_graph/config.py" file. 
+
+Step 2: Run graph generation using following commands:
+```
+cd src/Monograph
+python3 main_save_graphs.py
 ```
 
+To generate graphs from predicted depth and predicted semantic instances of hypersim data, do as follows:
+
+Step 1: Update src/Monograph/preds_to_graphs/config.py file. Make sure to give correct paths of hypersim rgb, predicted semantics, predicted depth, and output path. 
+
+
+Step 2: Generate graphs from predicted data
+```
+cd src/Monograph/preds_to_graphs
+python3 preds_to_graphs.py
 ```
 
 ## Train GCN network with Triplet loss using Generated Scene Graphs
