@@ -59,20 +59,18 @@ python3 test_model.py
 Check the predicted semantic images in main_path provided in config.py file.
 
 ## RGB to Depth 
-Step 1: Load and save rgb and groundtruth depth in torch format using dataloader
+Predict Depth from Rgb using AdelaiDepth pretrained network. 
+
+navigate to rgb-to-depth directory:
+```
+cd ../rgb-to-depth 
 ```
 
+Update image_dir and image_dir_out folders in test_depth.py before running it. Once updated, run the following:
 ```
-
-Step 2: Predict Depth from Rgb using AdelaiDepth pretrained network
+python3 test_depth.py 
 ```
-
-```
-
-Step 3: Test and save predicted depth data 
-```
-
-```
+Predicted depth data should be available on image_dir_out path mentioned above.
 
 ## Generate Scene Graph
 ```
