@@ -1,4 +1,42 @@
 # Monograph-Image-Retrieval
+
+The goal of this project was to use recent advances in monocular depth, instance segmentation, scene graphs, and graph neural networks to push the state-of-the-art in indoor image retrieval.
+
+## Setup environment in euler cluster of ETHZ 
+Clone this public repo: 
+```
+git clone https://github.com/rupalsaxena/Monograph-Image-Retrieval.git
+```
+TODO: add virtual env in package, how to run virtual environment, ask for space using slurm or something and then run the project
+
+
+## Pipeline overview
+![Alt text](https://github.com/rupalsaxena/Monograph-Image-Retrieval/blob/final_code/images/pipeline.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!---
+
+
+
+# Monograph-Image-Retrieval
 The goal of this project is to use recent advances in monocular depth, instance segmentation, scene graphs, and graph neural networks to push the state-of-the-art in indoor image retrieval.
 
 
@@ -117,3 +155,4 @@ from pipeline_graphloader import graph_loader
 loader = graph_loader(path='<path defaults to data location on euler>')
 triplet_dataloader = loader.load_triplet_dataset(start, stop, batch_size=1)
 ```
+-->
