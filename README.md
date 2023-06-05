@@ -11,7 +11,76 @@ TODO: add virtual env in package, how to run virtual environment, ask for space 
 
 
 ## Pipeline overview
+Shown below is the pipeline overview of this project. 
+
 ![Alt text](https://github.com/rupalsaxena/Monograph-Image-Retrieval/blob/final_code/images/pipeline.png)
+
+We will see how to run each element of this pipeline one by one.
+
+## Hypersim Data
+The Hypersim dataset, developed by Apple Inc., consists
+of a collection of photorealistic synthetic images depicting
+indoor scenes, accompanied by per-pixel ground truth labels. This data consists of RGB, Semantic, and Depth instances.
+
+Download the data from the link: [HypersimData](https://github.com/apple/ml-hypersim)
+
+## RGB to Semantic Instances
+**STEP 1**: Save rgb and groundtruth semantic instances in torch format using dataloader
+```
+# navigate to hypersim dataloader
+cd src/Monograph/dataloader/hypersim_pytorch
+```
+In your IDE, update the config parameters, specially PURPOSE="Semantic"
+Run the following commands to save hypersim data in pytorch format:
+```
+# save hypersim data in torch format
+python3 save_hypersim_dataset.py
+```
+Data will be saved in your provided output path in torch format.
+
+**STEP 2**: Train DeepLabv3 Resnet50 Model using transfer learning
+```
+
+```
+
+**STEP 3**: Test and save the predicted semantic data
+```
+
+```
+
+## RGB to Depth 
+Step 1: Load and save rgb and groundtruth depth in torch format using dataloader
+```
+
+```
+
+Step 2: Predict Depth from Rgb using AdelaiDepth pretrained network
+```
+
+```
+
+Step 3: Test and save predicted depth data 
+```
+
+```
+
+## Generate Scene Graph
+```
+
+```
+
+## Train GCN network with Triplet loss using Generated Scene Graphs
+```
+
+```
+
+## Proximity Matching
+```
+
+```
+
+
+
 
 
 
