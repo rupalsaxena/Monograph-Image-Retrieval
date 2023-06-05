@@ -4,6 +4,25 @@ The goal of this project was to use recent advances in monocular depth, instance
 
 We are using docker container so that all the users can have same working environment. You can either use Singularity in ETHZ HPC euler or directly use docker container in your local machine. 
 
+## Repository Overview
+
+```
+- data
+    - hypersim_train_graphs_GT    # example graphs for training
+    - hypersim_test_graphs_GT     # example graphs for testing
+- docker                          # docker build and docker run files
+- src
+    - Monograph
+        - configs                 # general configs
+        - dataloader              # dataloaders for different purposes
+        - GNN                     # load graphs and train GCN model
+        - generate_scene_graph    # generate scene graphs from ground truth data
+        - preds_to_graphs         # generate scene graphs from predicted data
+        - rgb-to-depth            # rgb to depth prediction
+        - rgb-to-semantics        # rgb to semantic training and prediction
+```
+
+
 ## Setting up Infrastructure using Singularity in ETHZ HPC euler
 To use Singularity in euler, your NETHZ username has to be added to ID-HPC-SINGULARITY group.
 
