@@ -74,6 +74,8 @@ cd ../../../
 Predicted depth data should be available on image_dir_out path mentioned above.
 
 ## Generate Scene Graph
+**Method 1:** Graphs from Ground Truth Images
+
 To generate graphs from ground truth depth and ground truth semantic instances of hypersim data, do as follows:
 
 Step 1: Update HYPERSIM_DATAPATH and HYPERSIM_GRAPHS path in "src/Monograph/generate_scene_graph/config.py" file. 
@@ -84,10 +86,11 @@ cd src/Monograph
 python3 main_save_graphs.py
 ```
 
+**Method 2:** Graphs from predicted images
+
 To generate graphs from predicted depth and predicted semantic instances of hypersim data, do as follows:
 
 Step 1: Update src/Monograph/preds_to_graphs/config.py file. Make sure to give correct paths of hypersim rgb, predicted semantics, predicted depth, and output path. 
-
 
 Step 2: Generate graphs from predicted data
 ```
